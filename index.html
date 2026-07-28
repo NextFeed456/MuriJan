@@ -216,7 +216,7 @@
       max-width: 800px;
       padding: 12px;
       box-shadow: 0 8px 15px rgba(255, 182, 193, 0.4);
-      position: relative;
+      position: relative; /* 子要素（モーダル）の基準位置 */
       backdrop-filter: blur(4px);
     }
     body.death-mode .game-board {
@@ -486,36 +486,37 @@
     .score-detail { font-size: 14px; color: #009688; font-weight: bold; }
     .error-msg { font-size: 12px; color: #e53935; margin-top: 4px; }
 
-    /* 💡 修正：モーダルを確実に画面全体へ正しく固定表示（ズレ防止） */
+    /* 💡 麻雀操作画面（ゲームボード）内部にだけ収まるモーダル設定 */
     .modal-overlay {
-      position: fixed !important;
+      position: absolute !important;
       top: 0 !important;
       left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      background: rgba(30, 20, 25, 0.96);
+      width: 100% !important;
+      height: 100% !important;
+      background: rgba(30, 20, 25, 0.94);
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 10px;
-      z-index: 99999 !important;
+      z-index: 100 !important;
       padding: 15px;
       text-align: center;
       overflow-y: auto;
     }
-    body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.96); }
+    body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.94); }
     .modal-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       color: #ffffff;
       text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px #ff7799;
     }
     body.death-mode .modal-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
     .modal-desc {
-      font-size: 13px;
+      font-size: 12px;
       color: #ffe6ec;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
     body.death-mode .modal-desc { color: #cccccc; }
@@ -531,10 +532,10 @@
     /* スマホ用 十字キーUIスタイル */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 45px);
-      grid-template-rows: repeat(2, 45px);
-      gap: 5px;
-      margin-top: 8px;
+      grid-template-columns: repeat(3, 42px);
+      grid-template-rows: repeat(2, 42px);
+      gap: 4px;
+      margin-top: 6px;
       justify-content: center;
       user-select: none;
     }
@@ -542,7 +543,7 @@
       background: #ffb6c1;
       border: 1px solid #ff88aa;
       color: #ffffff;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       border-radius: 10px;
       display: flex;
@@ -558,17 +559,17 @@
       box-shadow: none;
     }
 
-    .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 300px; }
-    .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; }
+    .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 8px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     .quiz-btn:hover { background: #ffe6ec; }
     
     /* フラッシュ暗算 数字アニメーション演出 */
     .flash-num {
-      font-size: 64px;
+      font-size: 52px;
       font-weight: bold;
       color: #ffffff;
       text-shadow: 0 0 15px #ff7799;
-      height: 80px;
+      height: 70px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -582,9 +583,9 @@
       100% { transform: scale(1); }
     }
 
-    .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
+    .flash-input { font-size: 18px; padding: 4px; width: 110px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
 
-    .coin-img { font-size: 50px; transition: transform 0.5s; }
+    .coin-img { font-size: 44px; transition: transform 0.5s; }
 
     .mentsu-option-btn {
       display: flex;
@@ -593,12 +594,12 @@
       gap: 8px;
       background: #ffffff;
       border: 2px solid #ff88aa;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 12px;
       cursor: pointer;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       width: 100%;
-      max-width: 340px;
+      max-width: 320px;
     }
     .mentsu-option-btn:hover { background: #ffe6ec; }
 
@@ -646,7 +647,7 @@
       <ul>
         <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
         <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
-        <li><b>ドラDiscardのペンダント</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>ドラDiscardのペナルティ</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
         <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
         <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
         <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
@@ -722,6 +723,13 @@
         <button onclick="sortHand()">理牌</button>
         <button onclick="initGame()">最初から</button>
       </div>
+
+      <!-- 💡 麻雀操作画面（ゲームボード）内部にだけ表示されるミニゲーム画面 -->
+      <div id="game-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-title" id="modal-title">イベント発生</div>
+        <div class="modal-desc" id="modal-desc">説明文</div>
+        <div id="modal-content"></div>
+      </div>
     </div>
 
     <!-- 折りたたみ式 ランキングボード（全員表示） -->
@@ -739,13 +747,6 @@
         </div>
       </div>
     </details>
-  </div>
-
-  <!-- 汎用オーバーレイ / ミニゲーム画面（画面全体を覆うように移動） -->
-  <div id="game-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-title" id="modal-title">イベント発生</div>
-    <div class="modal-desc" id="modal-desc">説明文</div>
-    <div id="modal-content"></div>
   </div>
 
   <!-- フッター -->
@@ -1555,8 +1556,8 @@
 
     function startDodgeGame(onSuccess, onFailure) {
       openModal("⚡ 回避ゲーム！", "5秒後に開始！【矢印キー】または下部の【ボタン】で動かして避けろ！", `
-        <div id="dodge-timer" style="font-size:22px; color:#ffffff; font-weight:bold; margin-bottom:5px; text-shadow:0 0 8px #ff5577;">5</div>
-        <canvas id="dodge-canvas" width="360" height="240"></canvas>
+        <div id="dodge-timer" style="font-size:20px; color:#ffffff; font-weight:bold; margin-bottom:4px; text-shadow:0 0 8px #ff5577;">5</div>
+        <canvas id="dodge-canvas" width="300" height="180"></canvas>
         <div class="dpad-container">
           <div></div>
           <div class="dpad-btn" onmousedown="setTouchKey('ArrowUp', true)" onmouseup="setTouchKey('ArrowUp', false)" ontouchstart="setTouchKey('ArrowUp', true); event.preventDefault();" ontouchend="setTouchKey('ArrowUp', false)">▲</div>
@@ -1584,7 +1585,7 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      let px = 170, py = 110, pSize = 14;
+      let px = 140, py = 80, pSize = 14;
       let bullets = [];
       let duration = 10.0;
       let gameActive = true;
@@ -1593,7 +1594,7 @@
       window.addEventListener('keydown', keyHandler);
       window.addEventListener('keyup', keyHandler);
 
-      for(let i = 0; i < 18; i++) {
+      for(let i = 0; i < 15; i++) {
         bullets.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -1695,11 +1696,11 @@
             let limitTime = 5;
             if (box) {
               box.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                  <div id="flash-timer-display" style="font-size:14px; color:#ff7799; font-weight:bold;">回答制限時間: 5.0秒</div>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                  <div id="flash-timer-display" style="font-size:13px; color:#ff7799; font-weight:bold;">回答制限時間: 5.0秒</div>
                   <div style="display:flex; align-items:center;">
                     <input type="number" id="flash-ans" class="flash-input" placeholder="合計" autofocus>
-                    <button onclick="checkFlashAns(${sum})" style="margin-left:5px;">回答</button>
+                    <button onclick="checkFlashAns(${sum})" style="margin-left:4px;">回答</button>
                   </div>
                 </div>
               `;
@@ -2135,7 +2136,7 @@
       if (tile.type === 'z') {
         displayText = HONORS[tile.val - 1];
         if (tile.val === 6) colorClass = 'green';
-        else if (tile.val === 7) colorClass = 'red';
+        else if (tile.val === 7) colorClass, colorClass = 'red';
       } else {
         displayText = tile.val;
         typeText = SUITS[tile.type];
