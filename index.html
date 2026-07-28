@@ -15,10 +15,6 @@
     /* ゆるふわベースのスタイル */
     body {
       background-color: #fff5f7;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
       color: #5a4048;
       font-family: 'Hiragino Sans', 'ヒラギノ角ゴ ProN', 'Meiryo', sans-serif;
       display: flex;
@@ -26,7 +22,25 @@
       align-items: center;
       margin: 0;
       padding: 10px;
-      transition: background-color 0.8s ease, background-image 0.8s ease;
+      transition: background-color 0.8s ease;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* 背景画像用オーバーレイ */
+    #bg-layer {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      pointer-events: none;
+    }
+    #bg-layer.active {
+      opacity: 1;
     }
 
     /* 💀 HP0時のガチデス感スタイル */
@@ -211,27 +225,44 @@
       box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
     }
 
+    /* 折りたたみ式 ランキングボード */
     .ranking-board {
       background-color: rgba(255, 255, 255, 0.92);
       border: 3px solid #ffccd5;
       border-radius: 20px;
       width: 100%;
       max-width: 800px;
-      padding: 12px;
+      padding: 0;
       box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
       backdrop-filter: blur(4px);
+      overflow: hidden;
     }
     body.death-mode .ranking-board {
       background-color: rgba(21, 0, 0, 0.92);
       border-color: #5a0e0e;
     }
-    .ranking-board h2 {
-      font-size: 15px;
-      margin-top: 0;
+    .ranking-summary {
+      font-size: 14px;
+      font-weight: bold;
       color: #ff6688;
       text-align: center;
-      border-bottom: 2px dashed #ffccd5;
-      padding-bottom: 6px;
+      padding: 10px 15px;
+      cursor: pointer;
+      user-select: none;
+      background: #ffe6ec;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    body.death-mode .ranking-summary {
+      background: #330000;
+      color: #ff5555;
+    }
+    .ranking-content {
+      padding: 12px;
+      max-height: 400px;
+      overflow-y: auto;
     }
     .ranking-list { list-style: none; padding: 0; margin: 0; }
     .ranking-item {
@@ -339,7 +370,7 @@
       font-weight: bold;
       position: relative;
       flex-shrink: 0;
-      transition: transform 0.1s, opacity 0.3s;
+      transition: transform 0.1s, opacity 0.3s, border-color 0.3s;
     }
     .tile:active { transform: translateY(-3px); background-color: #fff0f3; }
     .tile.riichi-target {
@@ -352,15 +383,32 @@
       100% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0); }
     }
 
-    /* 牌飛散・フェードアウト */
+    /* ✨ 爆発・飛び演出用アニメーション */
     .tile.destroying {
-      animation: flyFadeAnim 0.7s ease-out forwards !important;
-      z-index: 20;
+      animation: popDestroyAnim 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+      z-index: 50;
+      pointer-events: none;
     }
-    @keyframes flyFadeAnim {
-      0% { transform: translateY(0) scale(1); filter: brightness(1); opacity: 1; }
-      50% { filter: brightness(1.5) drop-shadow(0 0 10px #ff7799); background-color: #ff99bb; color: #fff; }
-      100% { transform: translateY(-80px) scale(1.3) rotate(20deg); opacity: 0; }
+    @keyframes popDestroyAnim {
+      0% { transform: scale(1) translateY(0); filter: brightness(1); opacity: 1; }
+      30% { transform: scale(1.25) translateY(-10px); filter: brightness(1.6); background-color: #ff3366; color: #fff; box-shadow: 0 0 15px #ff0055; }
+      100% { transform: scale(0.2) translateY(-60px) rotate(25deg); opacity: 0; filter: brightness(2); }
+    }
+
+    /* 🀄 上からスッと落ちてフードインで入る演出 */
+    .tile.slide-in {
+      animation: slideInAnim 0.55s ease-out forwards;
+    }
+    @keyframes slideInAnim {
+      0% { transform: translateY(-35px) scale(0.85); opacity: 0; }
+      70% { transform: translateY(4px) scale(1.03); opacity: 0.9; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* 🌟 新しく補充された牌の枠線ハイライト */
+    .tile.new-drawn {
+      border: 2px solid #00bfa5 !important;
+      box-shadow: 0 0 10px rgba(0, 191, 165, 0.6) !important;
     }
 
     .tile.red { color: #e04466; }
@@ -438,22 +486,22 @@
     .score-detail { font-size: 14px; color: #009688; font-weight: bold; }
     .error-msg { font-size: 12px; color: #e53935; margin-top: 4px; }
 
-    /* モーダル＆ミニゲーム オーバーレイ */
+    /* モーダル＆ミニゲーム 画面全域最前面表示（重なり防止） */
     .modal-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(30, 20, 25, 0.95);
-      border-radius: 18px;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(30, 20, 25, 0.96);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 12px;
-      z-index: 100;
+      gap: 10px;
+      z-index: 9999;
       padding: 15px;
       text-align: center;
+      overflow-y: auto;
     }
-    body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.95); }
+    body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.96); }
     .modal-title {
       font-size: 20px;
       font-weight: bold;
@@ -551,7 +599,7 @@
     }
     .mentsu-option-btn:hover { background: #ffe6ec; }
 
-    /* ★ 権利表記＆フッター領域 */
+    /* 権利表記＆フッター領域 */
     .game-footer {
       margin-top: 25px;
       margin-bottom: 15px;
@@ -583,9 +631,12 @@
 </head>
 <body>
 
+  <!-- フェードイン背景用レイヤー -->
+  <div id="bg-layer"></div>
+
   <h1>🌸 ふわふわ麻雀 🌸</h1>
 
-  <!-- 折りたたみルール表記（クリック/タップで開閉） -->
+  <!-- 折りたたみルール表記 -->
   <details class="rules-details">
     <summary class="rules-summary">📜 全体ルールを見る（タップで開閉）</summary>
     <div class="rules-content">
@@ -598,7 +649,7 @@
         <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
         <li><b>九種九牌</b>: 一九字牌が9種以上あればボタン出現。全牌を山札に戻して引き直し。</li>
         <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
-        <li><b>アガリの難関＆リーチ解除</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>失敗するとリーチが解除</b>されます。</li>
+        <li><b>アガリの試練</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>リーチ中に失敗するとリーチが解除</b>されます。</li>
       </ul>
     </div>
   </details>
@@ -677,18 +728,24 @@
       </div>
     </div>
 
-    <div class="ranking-board">
-      <h2>✨ 絶望を生き延びた者達 TOP 10</h2>
-      <ol class="ranking-list" id="ranking-list">
-        <li class="ranking-item" style="text-align:center;">読み込み中...</li>
-      </ol>
-      <div style="text-align: center; margin-top: 10px;">
-        <button onclick="fetchGlobalRanking()" style="padding: 4px 10px; font-size: 11px;">更新</button>
+    <!-- 折りたたみ式 ランキングボード（全員表示） -->
+    <details class="ranking-board">
+      <summary class="ranking-summary">
+        <span>✨ 絶望を生き延びた者達一覧</span>
+        <span style="font-size:11px; font-weight:normal;">（タップで開閉）</span>
+      </summary>
+      <div class="ranking-content">
+        <ol class="ranking-list" id="ranking-list">
+          <li class="ranking-item" style="text-align:center;">読み込み中...</li>
+        </ol>
+        <div style="text-align: center; margin-top: 10px;">
+          <button onclick="fetchGlobalRanking()" style="padding: 4px 10px; font-size: 11px;">更新</button>
+        </div>
       </div>
-    </div>
+    </details>
   </div>
 
-  <!-- ★ 権利表記 ＆ 配信・クレジット規定フッター ★ -->
+  <!-- フッター -->
   <footer class="game-footer">
     <div><strong>Developer / Copyright:</strong> NextFeed</div>
     <div>🎮 <strong>動画配信・実況について:</strong> YouTube・Twitch等の動画配信・実況での使用・収益化は制限なく<b>OK</b>です！</div>
@@ -709,26 +766,28 @@
 
     // ==========================================
     // 🖼️ 背景画像 ＆ 🎵 BGM 相対パス設定エリア
-    // （GitHubルート直下にアップロードした場合）
     // ==========================================
     const BG_IMAGES = {
-      normal: './bg_normal.jpg', // 通常時の背景画像
-      death: './bg_death.jpg'      // HP0（GAMEOVER）時の背景画像
+      normal: './bg_normal.jpg',
+      death: './bg_death.jpg'
     };
 
     const BGM_URLS = {
-      normal: './bgm_normal.mp3', // 通常時のBGM
-      riichi: './bgm_riichi.mp3'  // リーチ時のBGM
+      normal: './bgm_normal.mp3',
+      riichi: './bgm_riichi.mp3'
     };
 
-    // --- 背景画像の適用 ---
     function updateBackgroundImage(isDeath = false) {
-      if (isDeath && BG_IMAGES.death) {
-        document.body.style.backgroundImage = `url('${BG_IMAGES.death}')`;
-      } else if (!isDeath && BG_IMAGES.normal) {
-        document.body.style.backgroundImage = `url('${BG_IMAGES.normal}')`;
+      const bgLayer = document.getElementById('bg-layer');
+      if (!bgLayer) return;
+
+      const targetImg = isDeath ? BG_IMAGES.death : BG_IMAGES.normal;
+
+      if (targetImg) {
+        bgLayer.style.backgroundImage = `url('${targetImg}')`;
+        setTimeout(() => bgLayer.classList.add('active'), 50);
       } else {
-        document.body.style.backgroundImage = 'none';
+        bgLayer.classList.remove('active');
       }
     }
 
@@ -757,7 +816,7 @@
       if (!url) return;
 
       if (currentBgmAudio && currentBgmAudio.src.includes(url.replace('./', ''))) {
-        return; // すでに同じ曲が再生中の場合はスキップ
+        return;
       }
 
       stopBGM();
@@ -867,17 +926,16 @@
     let deck = [], hand = [], drawnTile = null, river = [];
     let doraIndicators = [], actualDoraTiles = [];
     let kanCount = 0;
-    let turn = 0; // 打牌数
-    let lastSacrificeTurn = -5; // 前回犠牲ターン
+    let turn = 0;
+    let lastSacrificeTurn = -5;
     let isRiichi = false, isRiichiSelecting = false, isGameOver = false;
     let autoDiscardTimer = null;
-    let flashCountdownTimer = null; // フラッシュ暗算 回答5秒タイマー
+    let flashCountdownTimer = null;
     let hp = 1000;
     const MAX_HP = 1000;
 
     let keys = {};
 
-    // クイズデータベース
     const QUIZ_DB = [
       { q: "麻雀の「ローカル役」で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
       { q: "光の速度はどっちが近い？", a: "秒速30万km", b: "秒速300万km", ans: "a" },
@@ -908,16 +966,17 @@
 
     function createDeck() {
       let tiles = [];
+      let idCounter = 1;
       ['m', 'p', 's'].forEach(s => {
         for (let n = 1; n <= 9; n++) {
           for (let i = 0; i < 4; i++) {
             let isAka = (n === 5 && i === 0);
-            tiles.push({ type: s, val: n, isAka: isAka });
+            tiles.push({ id: idCounter++, type: s, val: n, isAka: isAka });
           }
         }
       });
       HONORS.forEach((_, idx) => {
-        for (let i = 0; i < 4; i++) tiles.push({ type: 'z', val: idx + 1, isAka: false });
+        for (let i = 0; i < 4; i++) tiles.push({ id: idCounter++, type: 'z', val: idx + 1, isAka: false });
       });
       return tiles.sort(() => Math.random() - 0.5);
     }
@@ -981,7 +1040,6 @@
       fetchGlobalRanking();
     }
 
-    // --- ツモ＆山札リセット処理 ---
     function drawTile() {
       if (deck.length === 0) {
         if (river.length > 0) {
@@ -1043,7 +1101,6 @@
       river.push(discarded);
       playSE('discard');
 
-      // リーチ成立中は打牌によるHP減少をストップ！
       if (!isFree && !isRiichi) {
         let dmg = isTileDora(discarded) ? -100 : -50;
         updateHP(dmg);
@@ -1055,7 +1112,7 @@
         isRiichi = true;
         isRiichiSelecting = false;
         playSE('riichi');
-        playBGM('riichi'); // リーチ用BGMへ変更
+        playBGM('riichi');
         document.getElementById('riichi-badge').style.display = 'inline-block';
       }
 
@@ -1073,32 +1130,54 @@
     function shuffleAllHandTiles() {
       let count = hand.length + (drawnTile ? 1 : 0);
       hand = [];
-      for(let i=0; i<count-1; i++) hand.push(deck.pop());
+      let newAddedIds = [];
+      for(let i=0; i<count-1; i++) {
+        let t = deck.pop();
+        hand.push(t);
+        newAddedIds.push(t.id);
+      }
       drawnTile = deck.pop();
+      if(drawnTile) newAddedIds.push(drawnTile.id);
+
       sortTiles(hand);
+      render(newAddedIds, []);
     }
 
-    function removeRandomTiles(num) {
+    // ✨ 爆発・飛びエフェクトとフェードインの連動処理
+    function removeRandomTiles(num, callback) {
       playSE('destroy');
-      let targetElements = [];
+      let targetTileIds = [];
+      let newAddedTileIds = [];
 
       for (let i = 0; i < num; i++) {
         if (drawnTile && Math.random() < 0.2) {
-          drawnTile = deck.pop();
-          let drawnEl = document.querySelector('#drawn-tile .tile');
-          if (drawnEl) targetElements.push(drawnEl);
+          targetTileIds.push(drawnTile.id);
+          let newTile = deck.pop();
+          drawnTile = newTile;
+          if (newTile) newAddedTileIds.push(newTile.id);
         } else if (hand.length > 0) {
           let idx = Math.floor(Math.random() * hand.length);
-          hand[idx] = deck.pop();
-          let handEls = document.querySelectorAll('#hand .tile');
-          if (handEls[idx]) targetElements.push(handEls[idx]);
+          targetTileIds.push(hand[idx].id);
+          let newTile = deck.pop();
+          hand[idx] = newTile;
+          if (newTile) newAddedTileIds.push(newTile.id);
         }
       }
 
-      targetElements.forEach(el => el.classList.add('destroying'));
+      // 1. 爆発対象の牌に `.destroying` アニメーションを付与
+      let allTileElements = document.querySelectorAll('.tile');
+      allTileElements.forEach(el => {
+        let tileId = parseInt(el.dataset.id);
+        if (targetTileIds.includes(tileId)) {
+          el.classList.add('destroying');
+        }
+      });
+
+      // 2. 爆発アニメーション終了後（700ms後）に新牌をフェードイン表示
       setTimeout(() => {
         sortTiles(hand);
-        render();
+        render(newAddedTileIds, []);
+        if (callback) callback();
       }, 700);
     }
 
@@ -1124,15 +1203,21 @@
       drawnTile = null;
 
       setTimeout(() => {
-        for (let i = 0; i < 13; i++) hand.push(deck.pop());
+        let newIds = [];
+        for (let i = 0; i < 13; i++) {
+          let t = deck.pop();
+          hand.push(t);
+          newIds.push(t.id);
+        }
         sortTiles(hand);
         drawTile();
+        if (drawnTile) newIds.push(drawnTile.id);
+
         closeModal();
-        render();
+        render(newIds, []);
       }, 1500);
     }
 
-    // --- 面子犠牲（HP回復）選択システム ---
     function findAvailableMentsu(tiles) {
       let counts = getTileCounts(tiles);
       let list = [];
@@ -1195,6 +1280,7 @@
       }
     }
 
+    // ✨ 面子犠牲時の爆発＋追加牌の上からのフェードイン演出
     function execSacrificeMentsu(mentsuObj) {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
@@ -1205,34 +1291,53 @@
       playSE('destroy');
       lastSacrificeTurn = turn;
 
-      mentsuObj.tiles.forEach(target => {
-        if (drawnTile && drawnTile.type === target.type && drawnTile.val === target.val && drawnTile.isAka === target.isAka) {
-          drawnTile = null;
-        } else {
-          let idx = hand.findIndex(t => t.type === target.type && t.val === target.val && t.isAka === target.isAka);
-          if (idx !== -1) hand.splice(idx, 1);
+      // 1. 消滅対象面子のIDを特定
+      let destroyIds = mentsuObj.tiles.map(t => t.id);
+
+      // 手牌要素に爆発アニメーションを適用
+      let allTileEls = document.querySelectorAll('.tile');
+      allTileEls.forEach(el => {
+        let id = parseInt(el.dataset.id);
+        if (destroyIds.includes(id)) {
+          el.classList.add('destroying');
         }
       });
 
-      updateHP(healAmount);
-
+      // 2. 爆発演出後に手牌から削除し、新しい牌を追加
       setTimeout(() => {
+        mentsuObj.tiles.forEach(target => {
+          if (drawnTile && drawnTile.id === target.id) {
+            drawnTile = null;
+          } else {
+            let idx = hand.findIndex(t => t.id === target.id);
+            if (idx !== -1) hand.splice(idx, 1);
+          }
+        });
+
+        updateHP(healAmount);
+
+        let newAddedTileIds = [];
         playSE('heal');
         for(let i = 0; i < 3; i++) {
-          if (deck.length > 0) hand.push(deck.pop());
+          if (deck.length > 0) {
+            let t = deck.pop();
+            hand.push(t);
+            newAddedTileIds.push(t.id);
+          }
         }
         sortTiles(hand);
         
         if (!drawnTile && deck.length > 0) {
           drawnTile = deck.pop();
+          if (drawnTile) newAddedTileIds.push(drawnTile.id);
         }
 
+        render(newAddedTileIds, []);
         openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！（除外）`, "");
-        setTimeout(() => { closeModal(); render(); }, 1400);
-      }, 300);
+        setTimeout(() => closeModal(), 1400);
+      }, 700);
     }
 
-    // --- カン機能 ---
     function onClickKanButton() {
       if (isGameOver) return;
       const fullTiles = [...hand];
@@ -1300,11 +1405,11 @@
       setTimeout(() => {
         closeModal();
         drawTile();
-        render();
+        let newId = drawnTile ? [drawnTile.id] : [];
+        render(newId, []);
       }, 1200);
     }
 
-    // --- 各種イベント ---
     function triggerRandom10Event() {
       playSE('event');
       let r = Math.random();
@@ -1313,11 +1418,11 @@
         shuffleAllHandTiles();
         setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
       } else if (r < 0.50) {
-        startQuizEvent(() => { drawTile(); render(); }, () => { cancelRiichiAndContinue(); });
+        startQuizEvent(() => { drawTile(); render(); }, null);
       } else if (r < 0.75) {
-        startDodgeGame(() => { drawTile(); render(); }, () => { cancelRiichiAndContinue(); });
+        startDodgeGame(() => { drawTile(); render(); }, null);
       } else {
-        startFlashMathEvent(() => { drawTile(); render(); }, () => { cancelRiichiAndContinue(); });
+        startFlashMathEvent(() => { drawTile(); render(); }, null);
       }
     }
 
@@ -1354,18 +1459,18 @@
       } else {
         coinSuccessCount = 0;
         coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e53935;'>失敗！ 牌が3つ暴発しました！</p>`;
-        removeRandomTiles(3);
-        setTimeout(() => { closeModal(); render(); }, 1500);
+        removeRandomTiles(3, () => {
+          setTimeout(() => { closeModal(); }, 800);
+        });
       }
     }
 
-    // 試練失敗時のリーチ解除処理
-    function cancelRiichiAndContinue() {
+    function cancelRiichiOnAgariFail() {
       if (isRiichi) {
         isRiichi = false;
-        playBGM('normal'); // 通常BGMに戻す
+        playBGM('normal');
         document.getElementById('riichi-badge').style.display = 'none';
-        showMessage('⚠️ リーチ解除', '上がれなかったためリーチを解除しました。', '');
+        showMessage('⚠️ リーチ解除', 'アガリ試練に失敗したためリーチを解除しました。', '');
       }
       setTimeout(() => {
         closeModal();
@@ -1392,9 +1497,9 @@
         startQuizEvent(() => {
           startFlashMathEvent(() => {
             checkAgariFinal();
-          }, cancelRiichiAndContinue);
-        }, cancelRiichiAndContinue);
-      }, cancelRiichiAndContinue);
+          }, cancelRiichiOnAgariFail);
+        }, cancelRiichiOnAgariFail);
+      }, cancelRiichiOnAgariFail);
     }
 
     async function checkAgariFinal() {
@@ -1437,13 +1542,14 @@
         openModal("⭕ 正解！", "難を逃れました...", "");
         setTimeout(() => { closeModal(); window.currentQuizSuccess(); }, 1000);
       } else {
-        openModal("❌ 不正解！", "上がれなかったためリーチを解除しました！（牌が1つ入れ替わります）", "");
-        removeRandomTiles(1);
-        if (window.currentQuizFailure) {
-          window.currentQuizFailure();
-        } else {
-          setTimeout(() => { closeModal(); render(); }, 1500);
-        }
+        openModal("❌ 不正解！", "失敗しました！（牌が1つ入れ替わります）", "");
+        removeRandomTiles(1, () => {
+          if (window.currentQuizFailure) {
+            window.currentQuizFailure();
+          } else {
+            setTimeout(() => { closeModal(); }, 800);
+          }
+        });
       }
     }
 
@@ -1538,13 +1644,14 @@
             window.removeEventListener('keydown', keyHandler);
             window.removeEventListener('keyup', keyHandler);
             keys = {};
-            openModal("💥 被弾！", "上がれなかったためリーチを解除しました！（牌が5個飛びます）", "");
-            removeRandomTiles(5);
-            if (onFailure) {
-              onFailure();
-            } else {
-              setTimeout(() => { closeModal(); render(); }, 1500);
-            }
+            openModal("💥 被弾！", "失敗しました！（牌が5個飛びます）", "");
+            removeRandomTiles(5, () => {
+              if (onFailure) {
+                onFailure();
+              } else {
+                setTimeout(() => { closeModal(); }, 800);
+              }
+            });
             return;
           }
         }
@@ -1564,7 +1671,6 @@
       requestAnimationFrame(loop);
     }
 
-    // フラッシュ暗算（エフェクト・SE・5秒制限タイマー対応）
     function startFlashMathEvent(onSuccess, onFailure) {
       if (flashCountdownTimer) clearInterval(flashCountdownTimer);
 
@@ -1590,7 +1696,6 @@
           } else {
             clearInterval(interval);
             
-            // 回答フェーズ（5秒制限時間）
             let limitTime = 5;
             if (box) {
               box.innerHTML = `
@@ -1616,13 +1721,14 @@
 
               if (remain <= 0) {
                 clearInterval(flashCountdownTimer);
-                openModal("⏱️ タイムオーバー！", "5秒以内に回答できませんでした！上がれなかったためリーチを解除しました！", "");
-                removeRandomTiles(5);
-                if (window.currentFlashFailure) {
-                  window.currentFlashFailure();
-                } else {
-                  setTimeout(() => { closeModal(); render(); }, 1500);
-                }
+                openModal("⏱️ タイムオーバー！", "5秒以内に回答できませんでした！", "");
+                removeRandomTiles(5, () => {
+                  if (window.currentFlashFailure) {
+                    window.currentFlashFailure();
+                  } else {
+                    setTimeout(() => { closeModal(); }, 800);
+                  }
+                });
               }
             }, 100);
           }
@@ -1640,13 +1746,14 @@
         openModal("⭕ 正解！", "見事な計算力です！", "");
         setTimeout(() => { closeModal(); window.currentFlashSuccess(); }, 1000);
       } else {
-        openModal("❌ 不正解！", `正解は ${correctSum} でした！上がれなかったためリーチを解除しました！（牌が5個入れ替わります）`, "");
-        removeRandomTiles(5);
-        if (window.currentFlashFailure) {
-          window.currentFlashFailure();
-        } else {
-          setTimeout(() => { closeModal(); render(); }, 1500);
-        }
+        openModal("❌ 不正解！", `正解は ${correctSum} でした！（牌が5個入れ替わります）`, "");
+        removeRandomTiles(5, () => {
+          if (window.currentFlashFailure) {
+            window.currentFlashFailure();
+          } else {
+            setTimeout(() => { closeModal(); }, 800);
+          }
+        });
       }
     }
 
@@ -1824,7 +1931,6 @@
       return { rawScore, scoreText: text };
     }
 
-    // --- オンラインランキング通信処理 ---
     async function saveGlobalScore(playerName, turnNum, remHp, scoreVal, scoreText, yakuText) {
       document.getElementById('msg-error').innerText = '';
       if (!supabaseClient) {
@@ -1864,8 +1970,7 @@
       const { data, error } = await supabaseClient
         .from('impossible_mahjong_scores')
         .select('*')
-        .order('calc_point', { ascending: false })
-        .limit(10);
+        .order('calc_point', { ascending: false });
 
       if (error) {
         console.error('取得エラー:', error);
@@ -1901,8 +2006,8 @@
       );
     }
 
-    // --- 画面描画 ---
-    function render() {
+    // --- 画面描画 (新追加牌のフェードイン＆ハイライト制御付き) ---
+    function render(newAddedIds = [], destroyIds = []) {
       document.getElementById('deck-count').innerText = deck.length;
       document.getElementById('turn-count').innerText = turn;
 
@@ -1931,7 +2036,6 @@
         }
       }
 
-      // 面子消費回復ボタンの表示＆5ターン制限制御
       const btnSacrifice = document.getElementById('btn-sacrifice');
       let availableMentsu = findAvailableMentsu(fullTiles);
       if (!isGameOver && availableMentsu.length > 0) {
@@ -1948,7 +2052,6 @@
         btnSacrifice.style.display = 'none';
       }
 
-      // 九種九牌ボタン制御
       const btnKyushu = document.getElementById('btn-kyushu');
       if (!isGameOver && countYaochuTypes(fullTiles) >= 9) {
         btnKyushu.style.display = 'inline-block';
@@ -1980,18 +2083,28 @@
         btnRiichi.disabled = true;
       }
 
+      // 手牌描画（上からスッとフェードイン＋光演出）
       const handEl = document.getElementById('hand');
       handEl.innerHTML = '';
       hand.forEach((tile, idx) => {
         let isTarget = isRiichiSelecting && riichiDiscardIndices.includes(idx);
-        handEl.appendChild(createTileElement(tile, () => handleTileClick(idx, false), false, isTarget));
+        let isNew = newAddedIds.includes(tile.id);
+        let isDestroy = destroyIds.includes(tile.id);
+
+        let el = createTileElement(tile, () => handleTileClick(idx, false), false, isTarget, isNew, isDestroy);
+        handEl.appendChild(el);
       });
 
+      // ツモ牌描画
       const drawnEl = document.getElementById('drawn-tile');
       drawnEl.innerHTML = '';
       if (drawnTile) {
         let isTarget = isRiichiSelecting && riichiDiscardIndices.includes(hand.length);
-        drawnEl.appendChild(createTileElement(drawnTile, () => handleTileClick(null, true), false, isTarget));
+        let isNew = newAddedIds.includes(drawnTile.id);
+        let isDestroy = destroyIds.includes(drawnTile.id);
+
+        let el = createTileElement(drawnTile, () => handleTileClick(null, true), false, isTarget, isNew, isDestroy);
+        drawnEl.appendChild(el);
       }
 
       const riverEl = document.getElementById('river');
@@ -2007,12 +2120,22 @@
       discard(index, isDrawn);
     }
 
-    function createTileElement(tile, onClick, isSmall = false, isRiichiTarget = false) {
+    function createTileElement(tile, onClick, isSmall = false, isRiichiTarget = false, isNew = false, isDestroy = false) {
       const el = document.createElement('div');
       el.className = 'tile';
+      el.dataset.id = tile.id || 0;
+
       if (isSmall) el.classList.add('small');
       if (isRiichiTarget) el.classList.add('riichi-target');
       if (tile.isAka) el.classList.add('aka-dora');
+
+      // ✨ フェードイン・ハイライト・爆発アニメーション用クラス適用
+      if (isDestroy) el.classList.add('destroying');
+      if (isNew) {
+        el.classList.add('slide-in');
+        el.classList.add('new-drawn');
+        setTimeout(() => el.classList.remove('new-drawn'), 2000); // 2秒後に緑枠ハイライト消去
+      }
 
       let colorClass = 'black';
       let displayText = '', typeText = '';
