@@ -636,7 +636,7 @@
         <li><b>山札リセット</b>: 山札が0になると捨て牌が全て戻ってシャッフルし、<b>HP500回復</b>！</li>
         <li><b>九種九牌</b>: 一九字牌が9種以上があればボタン出現。全牌を山札に戻して引き直し。</li>
         <li><b>リーチ選択</b>: コイントス または「丁と半」の2択から選択可能！（丁・半は2回まで挑戦）</li>
-        <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
+        <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！<b>※リーチ中に失敗するとリーチが解除されます！</b></li>
         <li><b>アガリの試練</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>リーチ中に失敗するとリーチが解除</b>されます。</li>
       </ul>
     </div>
@@ -1393,10 +1393,39 @@
 
     function triggerRandom10Event() {
       playSE('event');
-      runRandomMiniGame(
-        () => { closeModal(); drawTile(); render(); },
-        () => { closeModal(); drawTile(); render(); }
-      );
+      let r = Math.random();
+      if (r < 0.25) {
+        openModal("😈 災難イベント", "手牌がすべて山牌と入れ替わりました！", "<div>手牌リセット！</div>");
+        shuffleAllHandTiles();
+        setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
+      } else {
+        // 10打牌ごとのミニゲーム（回避・クイズ・暗算）
+        let onSuccess = () => { closeModal(); drawTile(); render(); };
+        let onFailure = () => {
+          if (isRiichi) {
+            cancelRiichiOnEventFail();
+          } else {
+            closeModal();
+            drawTile();
+            render();
+          }
+        };
+        runRandomMiniGame(onSuccess, onFailure);
+      }
+    }
+
+    function cancelRiichiOnEventFail() {
+      if (isRiichi) {
+        isRiichi = false;
+        playBGM('normal');
+        document.getElementById('riichi-badge').style.display = 'none';
+        showMessage('⚠️ リーチ解除', '10打牌ごとのミニゲームに失敗したためリーチが解除されました。', '');
+      }
+      setTimeout(() => {
+        closeModal();
+        drawTile();
+        render();
+      }, 1500);
     }
 
     // --- ランダムなミニゲームを選択して実行する共通関数 ---
