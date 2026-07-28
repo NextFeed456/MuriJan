@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>クリアは無理な麻雀</title>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #1a0000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 10px;
+    }
+    h1 {
+      margin: 5px 0 10px 0;
+      font-size: 24px;
+      text-align: center;
+      color: #ff3333;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #ff0000;
+    }
+
+    /* HPゲージ */
+    .hp-container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid #880000;
+      border-radius: 8px;
+      padding: 6px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    }
+    .hp-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #ff8888;
+    }
+    .hp-bar-outer {
+      width: 100%;
+      height: 18px;
+      background: #330000;
+      border-radius: 9px;
+      overflow: hidden;
+      border: 1px solid #ff3333;
+    }
+    .hp-bar-inner {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff0000, #ff6600);
+      transition: width 0.3s ease;
+    }
+    
+    .game-layout {
+      display: flex;
+      gap: 15px;
+      max-width: 1200px;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .game-board {
+      background-color: #2b0808;
+      border: 4px solid #5a0e0e;
+      border-radius: 12px;
+      flex: 1;
+      width: 100%;
+      max-width: 800px;
+      padding: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .ranking-board {
+      background-color: #200505;
+      border: 4px solid #5a0e0e;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 800px;
+      padding: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+    }
+    .ranking-board h2 {
+      font-size: 16px;
+      margin-top: 0;
+      color: #ff4444;
+      text-align: center;
+      border-bottom: 2px solid #880000;
+      padding-bottom: 6px;
+    }
+    .ranking-list { list-style: none; padding: 0; margin: 0; }
+    .ranking-item {
+      background: rgba(0,0,0,0.5);
+      margin-bottom: 6px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      border-left: 3px solid #ff0000;
+    }
+    .ranking-item .rank-head { font-weight: bold; color: #ff9999; display: flex; justify-content: space-between; }
+    .ranking-item .rank-player { color: #ffffff; font-size: 11px; margin-top: 2px; }
+    .ranking-item .rank-detail { font-size: 10px; color: #bdc3c7; margin-top: 2px; }
+
+    .info-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: bold;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .dora-area { display: flex; align-items: center; gap: 4px; }
+
+    .tenpai-info-bar {
+      background: rgba(255, 0, 0, 0.15);
+      border: 1px solid #ff3333;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #ff9999;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+    }
+
+    .status-badge {
+      background-color: #e74c3c;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: none;
+    }
+    .river-section {
+      min-height: 90px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .river-title { font-size: 11px; color: #ff6666; margin-bottom: 4px; }
+    .tile-container { display: flex; flex-wrap: wrap; gap: 3px; }
+    
+    .hand-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 10px;
+      touch-action: manipulation;
+    }
+    .hand-tiles-area {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 2px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tile {
+      width: calc((100vw - 70px) / 14);
+      max-width: 40px;
+      min-width: 22px;
+      height: 52px;
+      background: #f4ebd9;
+      color: #333;
+      border-radius: 4px;
+      border-bottom: 3px solid #b8a98f;
+      box-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      font-weight: bold;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .tile:active { transform: translateY(-3px); background-color: #e6c280; }
+    .tile.riichi-target {
+      border: 2px solid #e74c3c;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+    }
+    .tile.red { color: #c0392b; }
+    .tile.green { color: #27ae60; }
+    .tile.black { color: #2c3e50; }
+    .tile.aka-dora { background-color: #fadbd8; }
+    .tile-num { font-size: 15px; line-height: 1; }
+    .tile-type { font-size: 9px; margin-top: 1px; }
+
+    .tile.small {
+      width: 24px;
+      height: 34px;
+      border-bottom: 2px solid #b8a98f;
+    }
+    .tile.small .tile-num { font-size: 11px; }
+    .tile.small .tile-type { font-size: 8px; }
+
+    .drawn-tile-area {
+      border-left: 2px dashed rgba(255,255,255,0.3);
+      padding-left: 6px;
+      flex-shrink: 0;
+    }
+
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    button {
+      background-color: #a02020;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #601010;
+      touch-action: manipulation;
+    }
+    button:active { transform: translateY(2px); box-shadow: 0 1px 0 #601010; }
+    button:disabled { background-color: #4a3030; box-shadow: 0 3px 0 #2a1818; cursor: not-allowed; opacity: 0.6; }
+    button.btn-riichi { background-color: #e74c3c; box-shadow: 0 3px 0 #922b21; }
+    button.btn-kan { background-color: #8e44ad; box-shadow: 0 3px 0 #5b2c6f; }
+
+    button.btn-win-glow {
+      background-color: #e74c3c !important;
+      box-shadow: 0 3px 0 #922b21 !important;
+      animation: winGlow 0.8s infinite alternate;
+    }
+    @keyframes winGlow {
+      0% { transform: scale(1); box-shadow: 0 0 5px #e74c3c; }
+      100% { transform: scale(1.05); box-shadow: 0 0 15px #f1c40f; }
+    }
+
+    .result-box {
+      margin-top: 12px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      min-height: 40px;
+    }
+    .result-title { font-size: 16px; font-weight: bold; color: #ff5555; }
+    .yaku-list { margin: 4px 0; font-size: 12px; color: #ecf0f1; }
+    .score-detail { font-size: 14px; color: #2ecc71; font-weight: bold; }
+    .error-msg { font-size: 12px; color: #e74c3c; margin-top: 4px; }
+
+    /* モーダル＆ミニゲーム オーバーレイ */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      padding: 15px;
+      text-align: center;
+    }
+    .modal-title { font-size: 18px; font-weight: bold; color: #ff4444; text-shadow: 0 0 8px #ff0000; }
+    .modal-desc { font-size: 13px; color: #cccccc; margin-bottom: 5px; }
+
+    /* ミニゲーム用エレメント */
+    #dodge-canvas {
+      background: #000;
+      border: 2px solid #ff0000;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 300px; }
+    .quiz-btn { background: #331111; border: 1px solid #ff4444; color: #fff; padding: 10px; border-radius: 6px; cursor: pointer; }
+    .quiz-btn:hover { background: #661111; }
+    
+    .flash-num { font-size: 64px; font-weight: bold; color: #ff3333; text-shadow: 0 0 20px #ff0000; height: 80px; }
+    .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #222; border: 1px solid #ff4444; color: white; }
+
+    .coin-img { font-size: 50px; transition: transform 0.5s; }
+  </style>
+</head>
+<body>
+
+  <h1>💀 クリアは無理な麻雀 💀</h1>
+
+  <!-- HPバー -->
+  <div class="hp-container">
+    <div class="hp-header">
+      <span>精神力 (HP)</span>
+      <span id="hp-text">1000 / 1000</span>
+    </div>
+    <div class="hp-bar-outer">
+      <div id="hp-bar" class="hp-bar-inner"></div>
+    </div>
+  </div>
+
+  <div class="game-layout">
+    <div class="game-board" id="game-board">
+      <div class="info-bar">
+        <div>自風: <span style="color:#ff5555;">東家（親）</span></div>
+        <div>残り: <span id="deck-count">0</span></div>
+        <div>打牌数: <span id="turn-count">0</span></div>
+        <div class="dora-area">
+          <span>ドラ:</span>
+          <div id="dora-tile-container" style="display:flex; gap:2px;"></div>
+        </div>
+        <div id="riichi-badge" class="status-badge">立直中</div>
+      </div>
+
+      <div class="tenpai-info-bar" id="tenpai-info-bar">
+        <span>待ち:</span>
+        <div id="waits-container" style="display:flex; gap:2px; flex-wrap:wrap;">なし</div>
+      </div>
+
+      <div class="river-section">
+        <div class="river-title">捨て牌（河）</div>
+        <div id="river" class="tile-container"></div>
+      </div>
+
+      <div class="hand-section">
+        <div id="hand" class="hand-tiles-area"></div>
+        <div class="drawn-tile-area">
+          <div id="drawn-tile"></div>
+        </div>
+      </div>
+
+      <div class="result-box" id="result-box">
+        <div class="result-title" id="msg-title"></div>
+        <div class="yaku-list" id="msg-yaku"></div>
+        <div class="score-detail" id="msg-score"></div>
+        <div class="error-msg" id="msg-error"></div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-kan" class="btn-kan" onclick="onClickKanButton()" style="display:none;">カン</button>
+        <button id="btn-riichi" class="btn-riichi" onclick="startRiichiSelect()" disabled>リーチ</button>
+        <button id="btn-win" onclick="startAgariSequence()">ツモアガリ</button>
+        <button onclick="sortHand()">理牌</button>
+        <button onclick="initGame()">最初から</button>
+      </div>
+
+      <!-- 汎用オーバーレイ / ミニゲーム画面 -->
+      <div id="game-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-title" id="modal-title">イベント発生</div>
+        <div class="modal-desc" id="modal-desc">説明文</div>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+
+    <div class="ranking-board">
+      <h2>🔥 絶望を生き延びた者達 TOP 10</h2>
+      <ol class="ranking-list" id="ranking-list">
+        <li class="ranking-item" style="text-align:center;">読み込み中...</li>
+      </ol>
+      <div style="text-align: center; margin-top: 10px;">
+        <button onclick="fetchGlobalRanking()" style="padding: 4px 10px; font-size: 11px;">更新</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // ⚙️ SUPABASE 接続設定
+    // ==========================================
+    const SUPABASE_URL = 'https://fxexiflthgohhqafddhr.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_0iMq0Jf5FmetEP1Ktw2VYg_W3lGJmjz';
+    
+    let supabaseClient = null;
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // --- Web Audio API (SE) ---
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function playSE(type) {
+      initAudio();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+
+      if (type === 'discard') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+        gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now); osc.stop(now + 0.08);
+      } else if (type === 'damage') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+        gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'event') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
+        osc.frequency.setValueAtTime(600, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+      } else if (type === 'riichi') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+      } else if (type === 'win') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.type = 'triangle'; o.frequency.value = freq;
+          const st = now + i * 0.12, dur = i === 3 ? 0.7 : 0.14;
+          g.gain.setValueAtTime(0.3, st); g.gain.exponentialRampToValueAtTime(0.001, st + dur);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(st); o.stop(st + dur);
+        });
+      } else if (type === 'error') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
+      } else if (type === 'sort') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+      }
+    }
+
+    // --- 麻雀ゲーム本体変数 ---
+    const SUITS = { m: '萬', p: '筒', s: '索' };
+    const HONORS = ['東', '南', '西', '北', '白', '發', '中'];
+    const YAOCHU_KEYS = ['m_1','m_9','p_1','p_9','s_1','s_9','z_1','z_2','z_3','z_4','z_5','z_6','z_7'];
+
+    let deck = [], hand = [], drawnTile = null, river = [];
+    let doraIndicators = [], actualDoraTiles = [];
+    let kanCount = 0;
+    let turn = 0; // 打牌数
+    let isRiichi = false, isRiichiSelecting = false, isGameOver = false;
+    let autoDiscardTimer = null;
+    let hp = 1000;
+    const MAX_HP = 1000;
+
+    // クイズデータベース（難易度高めの2択クイズ100問）
+    const QUIZ_DB = [
+      { q: "麻雀の「ローカル役」で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
+      { q: "光の速度はどっちが近い？", a: "秒速30万km", b: "秒速300万km", ans: "a" },
+      { q: "日本で一番広い都道府県は？", a: "北海道", b: "岩手県", ans: "a" },
+      { q: "広辞苑で最初に出てくる言葉は？", a: "アーア", b: "アイ", ans: "a" },
+      { q: "将棋の盤面はマス目がいくつ？", a: "81マス", b: "64マス", ans: "a" },
+      { q: "元素記号「Fe」は何の金属？", a: "鉄", b: "フッ素", ans: "a" },
+      { q: "1ヤードは何センチメートル？", a: "約91.4cm", b: "約81.4cm", ans: "a" },
+      { q: "富士山の標高は？", a: "3776m", b: "3876m", ans: "a" },
+      { q: "ダチョウの目は脳より大きい？", a: "大きい", b: "小さい", ans: "a" },
+      { q: "イチゴのつぶつぶは種である？", a: "果実である", b: "種である", ans: "a" },
+      { q: "人体で一番硬い部分は？", a: "エナメル質", b: "大腿骨", ans: "a" },
+      { q: "エベレストの標高は？", a: "8848m", b: "8888m", ans: "a" },
+      { q: "1ポンドは約何グラム？", a: "約453g", b: "約353g", ans: "a" },
+      { q: "タコの心臓の数は？", a: "3つ", b: "1つ", ans: "a" },
+      { q: "キリンの首の骨の数は？", a: "7個", b: "12個", ans: "a" }
+    ];
+    // 100個まで自動拡張生成（デモ用汎用難度補正）
+    for(let i=QUIZ_DB.length; i<100; i++) {
+      let n1 = Math.floor(Math.random()*89)+10;
+      let n2 = Math.floor(Math.random()*89)+10;
+      QUIZ_DB.push({
+        q: `高度計算クイズ: ${n1} × ${n2} の一の位は？`,
+        a: `${(n1*n2)%10}`,
+        b: `${((n1*n2)+3)%10}`,
+        ans: "a"
+      });
+    }
+
+    function createDeck() {
+      let tiles = [];
+      ['m', 'p', 's'].forEach(s => {
+        for (let n = 1; n <= 9; n++) {
+          for (let i = 0; i < 4; i++) {
+            let isAka = (n === 5 && i === 0);
+            tiles.push({ type: s, val: n, isAka: isAka });
+          }
+        }
+      });
+      HONORS.forEach((_, idx) => {
+        for (let i = 0; i < 4; i++) tiles.push({ type: 'z', val: idx + 1, isAka: false });
+      });
+      return tiles.sort(() => Math.random() - 0.5);
+    }
+
+    function getDoraFromIndicator(ind) {
+      if (ind.type === 'z') {
+        if (ind.val <= 4) return { type: 'z', val: ind.val === 4 ? 1 : ind.val + 1 };
+        else return { type: 'z', val: ind.val === 7 ? 5 : ind.val + 1 };
+      } else {
+        return { type: ind.type, val: ind.val === 9 ? 1 : ind.val + 1 };
+      }
+    }
+
+    function updateHP(amount) {
+      hp += amount;
+      if (hp > MAX_HP) hp = MAX_HP;
+      if (hp <= 0) {
+        hp = 0;
+        isGameOver = true;
+        showMessage('💀 GAME OVER', 'HPが0になりました。あなたの負けです。', '');
+      }
+      document.getElementById('hp-text').innerText = `${hp} / ${MAX_HP}`;
+      document.getElementById('hp-bar').style.width = `${(hp / MAX_HP) * 100}%`;
+    }
+
+    function initGame() {
+      if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
+      deck = createDeck();
+      hand = []; river = []; turn = 0; kanCount = 0; hp = MAX_HP;
+      isRiichi = false; isRiichiSelecting = false; isGameOver = false;
+
+      doraIndicators = [deck.pop()];
+      actualDoraTiles = [getDoraFromIndicator(doraIndicators[0])];
+
+      document.getElementById('riichi-badge').style.display = 'none';
+      closeModal();
+      clearMessages();
+      updateHP(0);
+
+      for (let i = 0; i < 13; i++) hand.push(deck.pop());
+      sortTiles(hand);
+      drawTile();
+      render();
+      fetchGlobalRanking();
+    }
+
+    function drawTile() {
+      if (deck.length === 0) {
+        showMessage('流局', '山牌がなくなりました。', '');
+        isGameOver = true;
+        drawnTile = null;
+        return;
+      }
+      drawnTile = deck.pop();
+
+      if (isRiichi && !isGameOver) {
+        const fullTiles = [...hand, drawnTile];
+        if (!checkWin(fullTiles)) {
+          if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
+          autoDiscardTimer = setTimeout(() => {
+            if (!isGameOver && isRiichi) discard(null, true);
+          }, 350);
+        }
+      }
+    }
+
+    function sortTiles(arr) {
+      const order = { m: 1, p: 2, s: 3, z: 4 };
+      arr.sort((a, b) => (order[a.type] !== order[b.type]) ? order[a.type] - order[b.type] : a.val - b.val);
+    }
+
+    function sortHand() {
+      if (isGameOver || isRiichi) return;
+      playSE('sort');
+      sortTiles(hand);
+      render();
+    }
+
+    // --- 打牌＆各種乱入イベント判定 ---
+    function discard(index, isDrawn, isFree = false) {
+      if (isGameOver) return;
+      if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
+
+      let discarded;
+      if (isDrawn) {
+        discarded = drawnTile;
+        drawnTile = null;
+      } else {
+        discarded = hand.splice(index, 1)[0];
+        if (drawnTile) {
+          hand.push(drawnTile);
+          drawnTile = null;
+          sortTiles(hand);
+        }
+      }
+
+      river.push(discarded);
+      playSE('discard');
+
+      // HP減少処理
+      if (!isFree) {
+        updateHP(-50);
+        playSE('damage');
+        if (isGameOver) { render(); return; }
+      }
+
+      if (isRiichiSelecting) {
+        isRiichi = true;
+        isRiichiSelecting = false;
+        playSE('riichi');
+        document.getElementById('riichi-badge').style.display = 'inline-block';
+      }
+
+      turn++;
+      render();
+
+      // 10打牌ごとのランダムイベントチェック
+      if (turn > 0 && turn % 10 === 0) {
+        triggerRandom10Event();
+      } else {
+        drawTile();
+        render();
+      }
+    }
+
+    // --- ランダム牌影響関数（HP減少なし） ---
+    function shuffleAllHandTiles() {
+      let count = hand.length + (drawnTile ? 1 : 0);
+      hand = [];
+      for(let i=0; i<count-1; i++) hand.push(deck.pop());
+      drawnTile = deck.pop();
+      sortTiles(hand);
+    }
+
+    function removeRandomTiles(num) {
+      for (let i = 0; i < num; i++) {
+        if (drawnTile && Math.random() < 0.2) {
+          drawnTile = deck.pop();
+        } else if (hand.length > 0) {
+          let idx = Math.floor(Math.random() * hand.length);
+          hand[idx] = deck.pop();
+        }
+      }
+      sortTiles(hand);
+    }
+
+    // --- 10打牌ごとのランダムイベント ---
+    function triggerRandom10Event() {
+      playSE('event');
+      let r = Math.random();
+      if (r < 0.25) {
+        // イベント1: 全手牌交換
+        openModal("😈 災難イベント", "手牌がすべて山牌と入れ替わりました！", "<div>手牌リセット！</div>");
+        shuffleAllHandTiles();
+        setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
+      } else if (r < 0.50) {
+        // イベント2: 突如クイズ
+        startQuizEvent(() => { drawTile(); render(); });
+      } else if (r < 0.75) {
+        // イベント3: 避けるゲーム
+        startDodgeGame(() => { drawTile(); render(); });
+      } else {
+        // イベント4: フラッシュ暗算
+        startFlashMathEvent(() => { drawTile(); render(); });
+      }
+    }
+
+    // --- リーチイベント ---
+    function startRiichiSelect() {
+      if (isRiichi || isGameOver) return;
+      playSE('event');
+      // コイントス3回
+      openModal("リーチさせると思ったか？", "コイントスで3回連続【表】を出せばリーチ許可！失敗で牌が3つ消滅！", "<div id='coin-area'><div class='coin-img'>🪙</div><button onclick='execCoinToss()' style='margin-top:10px;'>コインを投げる</button></div>");
+    }
+
+    let coinSuccessCount = 0;
+    function execCoinToss() {
+      let coinArea = document.getElementById('coin-area');
+      let win = Math.random() < 0.5;
+      if (win) {
+        coinSuccessCount++;
+        coinArea.innerHTML = `<div class='coin-img'>🪙</div><p style='color:#2ecc71;'>成功！ (${coinSuccessCount}/3)</p>`;
+        if (coinSuccessCount >= 3) {
+          coinSuccessCount = 0;
+          setTimeout(() => {
+            closeModal();
+            isRiichiSelecting = true;
+            showMessage('立直準備', 'リーチで切る牌を選択してください。', '');
+            render();
+          }, 1000);
+        } else {
+          coinArea.innerHTML += `<button onclick='execCoinToss()'>次を投げる</button>`;
+        }
+      } else {
+        coinSuccessCount = 0;
+        coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e74c3c;'>失敗！ 牌が3つ暴発しました！</p>`;
+        removeRandomTiles(3);
+        setTimeout(() => { closeModal(); render(); }, 1500);
+      }
+    }
+
+    // --- ツモアガリ時 怒涛の3連絶望イベント ---
+    function startAgariSequence() {
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      let expectedCount = 14 - (kanCount * 3);
+      if (fullTiles.length !== expectedCount) return;
+
+      if (!checkWin(fullTiles)) {
+        playSE('error');
+        showMessage('❌ チョンボ', 'まだアガリの形になっていません。', '');
+        return;
+      }
+
+      playSE('event');
+      // 第1関門: 回避ゲーム
+      openModal("上がらせると思ったか？ (1/3)", "第1試練：10秒間弾幕を回避せよ！失敗すると牌が5個飛ぶ！", "");
+      startDodgeGame(() => {
+        // 第2関門: クイズ
+        startQuizEvent(() => {
+          // 第3関門: フラッシュ暗算
+          startFlashMathEvent(() => {
+            // 全クリアでついにアガリ！
+            checkAgariFinal();
+          });
+        });
+      });
+    }
+
+    async function checkAgariFinal() {
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      if (checkWin(fullTiles)) {
+        playSE('win');
+        let res = evaluateHand(fullTiles, isRiichi);
+        let yakuStr = res.yakus.map(y => `${y.name}`).join('・');
+        
+        showMessage(`🎉 奇跡のツモアガリ！（打牌数:${turn}）`, yakuStr, res.scoreText);
+        isGameOver = true;
+        render();
+
+        let playerName = prompt('🎉 理不尽を乗り越えました！ランキングに登録する名前を入力してください:', '絶望の生存者');
+        if (playerName) {
+          await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
+        }
+      }
+    }
+
+    // --- ミニゲーム 1: クイズ ---
+    function startQuizEvent(onSuccess) {
+      let q = QUIZ_DB[Math.floor(Math.random() * QUIZ_DB.length)];
+      openModal("🧠 突如クイズ！", q.q, `
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuizAns('a', '${q.ans}', ${onSuccess.name})">${q.a}</button>
+          <button class="quiz-btn" onclick="checkQuizAns('b', '${q.ans}', ${onSuccess.name})">${q.b}</button>
+        </div>
+      `);
+      window.currentQuizSuccess = onSuccess;
+    }
+
+    function checkQuizAns(userAns, correctAns) {
+      if (userAns === correctAns) {
+        openModal("⭕ 正解！", "難を逃れました...", "");
+        setTimeout(() => { closeModal(); window.currentQuizSuccess(); }, 1000);
+      } else {
+        openModal("❌ 不正解！", "罰として牌が1つランダムで入れ替わります！再度クイズ！", "");
+        removeRandomTiles(1);
+        setTimeout(() => { startQuizEvent(window.currentQuizSuccess); }, 1200);
+      }
+    }
+
+    // --- ミニゲーム 2: アンダーテール風 回避ゲーム ---
+    function startDodgeGame(onSuccess) {
+      openModal("⚡ 回避ゲーム！", "5秒後に開始！キーボード【矢印キー】で赤枠を動かし10秒間弾を避けろ！", `
+        <div id="dodge-timer" style="font-size:20px; color:#ff3333; font-weight:bold;">5</div>
+        <canvas id="dodge-canvas" width="260" height="200"></canvas>
+      `);
+
+      let count = 5;
+      let timer = setInterval(() => {
+        count--;
+        let el = document.getElementById('dodge-timer');
+        if (el) el.innerText = count;
+        if (count <= 0) {
+          clearInterval(timer);
+          runDodgeEngine(onSuccess);
+        }
+      }, 1000);
+    }
+
+    function runDodgeEngine(onSuccess) {
+      const canvas = document.getElementById('dodge-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let px = 120, py = 90, pSize = 12;
+      let bullets = [];
+      let keys = {};
+      let duration = 10.0;
+      let gameActive = true;
+
+      for(let i=0; i<15; i++) {
+        bullets.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4
+        });
+      }
+
+      const keyHandler = (e) => { keys[e.key] = e.type === 'keydown'; };
+      window.addEventListener('keydown', keyHandler);
+      window.addEventListener('keyup', keyHandler);
+
+      let lastTime = performance.now();
+      function loop(now) {
+        if (!gameActive) return;
+        let dt = (now - lastTime) / 1000;
+        lastTime = now;
+        duration -= dt;
+
+        let timerEl = document.getElementById('dodge-timer');
+        if (timerEl) timerEl.innerText = `残り: ${Math.max(0, duration).toFixed(1)}秒`;
+
+        if (keys['ArrowUp'] && py > 0) py -= 3;
+        if (keys['ArrowDown'] && py < canvas.height - pSize) py += 3;
+        if (keys['ArrowLeft'] && px > 0) px -= 3;
+        if (keys['ArrowRight'] && px < canvas.width - pSize) px += 3;
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 自機 (赤枠)
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(px, py, pSize, pSize);
+
+        // 弾
+        ctx.fillStyle = '#ffffff';
+        for (let b of bullets) {
+          b.x += b.vx; b.y += b.vy;
+          if (b.x < 0 || b.x > canvas.width) b.vx *= -1;
+          if (b.y < 0 || b.y > canvas.height) b.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
+          ctx.fill();
+
+          // 当たり判定
+          if (px < b.x + 4 && px + pSize > b.x - 4 && py < b.y + 4 && py + pSize > b.y - 4) {
+            gameActive = false;
+            window.removeEventListener('keydown', keyHandler);
+            window.removeEventListener('keyup', keyHandler);
+            openModal("💥 被弾！", "回避失敗！罰として牌が5個飛びました！", "");
+            removeRandomTiles(5);
+            setTimeout(() => { closeModal(); render(); }, 1500);
+            return;
+          }
+        }
+
+        if (duration <= 0) {
+          gameActive = false;
+          window.removeEventListener('keydown', keyHandler);
+          window.removeEventListener('keyup', keyHandler);
+          openModal("✨ 回避成功！", "見事に避け切りました！", "");
+          setTimeout(() => { closeModal(); onSuccess(); }, 1000);
+          return;
+        }
+
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    }
+
+    // --- ミニゲーム 3: フラッシュ暗算 ---
+    function startFlashMathEvent(onSuccess) {
+      openModal("⚡ フラッシュ暗算", "表示される5個の1桁の数字の合計を答えろ！", "<div id='flash-box' class='flash-num'>READY...</div>");
+
+      let numbers = [];
+      for(let i=0; i<5; i++) numbers.push(Math.floor(Math.random()*9)+1);
+      let sum = numbers.reduce((a,b)=>a+b, 0);
+
+      let idx = 0;
+      setTimeout(() => {
+        let interval = setInterval(() => {
+          let box = document.getElementById('flash-box');
+          if (idx < numbers.length) {
+            if (box) box.innerText = numbers[idx];
+            idx++;
+          } else {
+            clearInterval(interval);
+            if (box) box.innerHTML = `
+              <input type="number" id="flash-ans" class="flash-input" placeholder="合計">
+              <button onclick="checkFlashAns(${sum}, ${onSuccess.name})" style="margin-left:5px;">回答</button>
+            `;
+            window.currentFlashSuccess = onSuccess;
+          }
+        }, 600);
+      }, 1000);
+    }
+
+    function checkFlashAns(correctSum) {
+      let val = parseInt(document.getElementById('flash-ans').value);
+      if (val === correctSum) {
+        openModal("⭕ 正解！", "見事な計算力です！", "");
+        setTimeout(() => { closeModal(); window.currentFlashSuccess(); }, 1000);
+      } else {
+        openModal("❌ 不正解！", `正解は ${correctSum} でした！罰として牌が5個入れ替わります！`, "");
+        removeRandomTiles(5);
+        setTimeout(() => { closeModal(); render(); }, 1500);
+      }
+    }
+
+    // --- モーダル制御 ---
+    function openModal(title, desc, contentHtml) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-desc').innerText = desc;
+      document.getElementById('modal-content').innerHTML = contentHtml;
+      document.getElementById('game-modal').style.display = 'flex';
+    }
+    function closeModal() {
+      document.getElementById('game-modal').style.display = 'none';
+    }
+
+    // --- カン機能 ---
+    function onClickKanButton() {
+      if (isGameOver) return;
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      let counts = getTileCounts(fullTiles);
+      let kanKeys = Object.keys(counts).filter(k => counts[k] === 4);
+
+      if (kanKeys.length === 0) return;
+
+      if (kanKeys.length === 1) {
+        execKan(kanKeys[0]);
+      } else {
+        showKanModal(kanKeys);
+      }
+    }
+
+    function showKanModal(kanKeys) {
+      let html = '<div style="display:flex; gap:10px;">';
+      kanKeys.forEach(key => {
+        let [type, valStr] = key.split('_');
+        html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
+      });
+      html += '</div>';
+      openModal("どの牌をカンしますか？", "", html);
+    }
+
+    function execKan(kanKey) {
+      let [type, valStr] = kanKey.split('_');
+      let val = parseInt(valStr);
+
+      if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
+        drawnTile = null;
+      }
+      hand = hand.filter(t => !(t.type === type && t.val === val));
+
+      kanCount++;
+      playSE('sort');
+
+      if (deck.length > 0) {
+        let newDoraInd = deck.pop();
+        doraIndicators.push(newDoraInd);
+        actualDoraTiles.push(getDoraFromIndicator(newDoraInd));
+      }
+
+      if (kanCount >= 4) {
+        showMessage('流局（四開槓）', 'カンが4回行われたため流局となりました。', '');
+        isGameOver = true;
+        render();
+        return;
+      }
+
+      drawTile();
+      render();
+    }
+
+    // --- 役判定関連アルゴリズム ---
+    function getTenpaiDiscards(hand13, currentDrawn) {
+      const fullTiles = [...hand13];
+      if (currentDrawn) fullTiles.push(currentDrawn);
+
+      let validDiscardIndices = [];
+      for (let i = 0; i < fullTiles.length; i++) {
+        let temp13 = fullTiles.filter((_, idx) => idx !== i);
+        if (checkTenpai(temp13).length > 0) validDiscardIndices.push(i);
+      }
+      return validDiscardIndices;
+    }
+
+    function checkTenpai(handTiles) {
+      const allPossibleTiles = [];
+      ['m', 'p', 's'].forEach(s => { for(let n=1; n<=9; n++) allPossibleTiles.push({type:s, val:n}); });
+      for(let n=1; n<=7; n++) allPossibleTiles.push({type:'z', val:n});
+
+      let waitingTiles = [];
+      for (let tile of allPossibleTiles) {
+        if (checkWin([...handTiles, tile])) {
+          waitingTiles.push(tile);
+        }
+      }
+      return waitingTiles;
+    }
+
+    function checkWin(tiles) {
+      let counts = getTileCounts(tiles);
+
+      if (kanCount === 0) {
+        let pairCount = 0, isChitoi = true;
+        for (let k in counts) {
+          if (counts[k] === 2) pairCount++;
+          else if (counts[k] !== 0) isChitoi = false;
+        }
+        if (isChitoi && pairCount === 7) return true;
+      }
+
+      if (kanCount === 0) {
+        let yaochuTypes = 0, hasPair = false;
+        for (let k of YAOCHU_KEYS) {
+          if (counts[k] >= 1) yaochuTypes++;
+          if (counts[k] === 2) hasPair = true;
+        }
+        if (yaochuTypes === 13 && hasPair && Object.keys(counts).every(k => YAOCHU_KEYS.includes(k) ? counts[k] <= 2 : counts[k] === 0)) return true;
+      }
+
+      for (let k in counts) {
+        if (counts[k] >= 2) {
+          counts[k] -= 2;
+          if (checkMentsu(counts)) return true;
+          counts[k] += 2;
+        }
+      }
+      return false;
+    }
+
+    function checkMentsu(counts) {
+      let remKey = Object.keys(counts).find(k => counts[k] > 0);
+      if (!remKey) return true;
+      let [type, valStr] = remKey.split('_'), val = parseInt(valStr);
+
+      if (counts[remKey] >= 3) {
+        counts[remKey] -= 3;
+        if (checkMentsu(counts)) return true;
+        counts[remKey] += 3;
+      }
+      if (type !== 'z' && val <= 7) {
+        let k2 = `${type}_${val+1}`, k3 = `${type}_${val+2}`;
+        if (counts[k2] > 0 && counts[k3] > 0) {
+          counts[remKey]--; counts[k2]--; counts[k3]--;
+          if (checkMentsu(counts)) return true;
+          counts[remKey]++; counts[k2]++; counts[k3]++;
+        }
+      }
+      return false;
+    }
+
+    function getTileCounts(tiles) {
+      let counts = {};
+      tiles.forEach(t => {
+        let key = `${t.type}_${t.val}`;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      return counts;
+    }
+
+    function evaluateHand(tiles, isRiichiActive) {
+      let counts = getTileCounts(tiles);
+      let yakus = [];
+
+      if (kanCount === 0) {
+        let yaochuTypes = 0, hasPair = false, kokushiPairKey = null;
+        for (let k of YAOCHU_KEYS) {
+          if (counts[k] >= 1) yaochuTypes++;
+          if (counts[k] === 2) { hasPair = true; kokushiPairKey = k; }
+        }
+        if (yaochuTypes === 13 && hasPair) {
+          if (drawnTile && `${drawnTile.type}_${drawnTile.val}` === kokushiPairKey) {
+            yakus.push({ name: '国士無双十三面待ち', han: 26, isDouble: true });
+          } else {
+            yakus.push({ name: '国士無双', han: 13 });
+          }
+        }
+      }
+
+      if (counts['z_5'] >= 3 && counts['z_6'] >= 3 && counts['z_7'] >= 3) yakus.push({ name: '大三元', han: 13 });
+      if (Object.keys(counts).every(k => k.startsWith('z') || counts[k] === 0)) yakus.push({ name: '字一色', han: 13 });
+
+      if (yakus.length > 0) {
+        let doubleCount = 0;
+        yakus.forEach(y => { doubleCount += (y.isDouble ? 2 : 1); });
+        let rawScore = 32000 * doubleCount;
+        let scoreText = doubleCount > 1 ? `${doubleCount}倍役満 ${rawScore}点` : `役満 32000点`;
+        return { yakus, rawScore, scoreText };
+      }
+
+      yakus.push({ name: '門前清自摸和', han: 1 });
+      if (isRiichiActive) yakus.push({ name: '立直', han: 1 });
+
+      if (kanCount === 0) {
+        let pairCount = 0;
+        for (let k in counts) if (counts[k] === 2) pairCount++;
+        if (pairCount === 7) yakus.push({ name: '七対子', han: 2 });
+      }
+
+      if (Object.keys(counts).every(k => !YAOCHU_KEYS.includes(k) || counts[k] === 0)) yakus.push({ name: '断幺九', han: 1 });
+
+      let doraCount = 0, akaDoraCount = 0;
+      tiles.forEach(t => {
+        actualDoraTiles.forEach(dt => {
+          if (t.type === dt.type && t.val === dt.val) doraCount++;
+        });
+        if (t.isAka) akaDoraCount++;
+      });
+
+      if (doraCount > 0) yakus.push({ name: `ドラ ${doraCount}`, han: doraCount });
+      if (akaDoraCount > 0) yakus.push({ name: `赤ドラ ${akaDoraCount}`, han: akaDoraCount });
+
+      let totalHan = yakus.reduce((sum, y) => sum + y.han, 0);
+      let fu = (kanCount === 0 && yakus.some(y => y.name === '七対子')) ? 25 : 30;
+
+      let { rawScore, scoreText } = calculateScore(totalHan, fu);
+
+      return { yakus, totalHan, fu, rawScore, scoreText };
+    }
+
+    function calculateScore(han, fu) {
+      let rawScore = 0, text = '';
+      if (han >= 13) { rawScore = 32000; text = `役満 32000点 (${han}翻)`; }
+      else if (han >= 11) { rawScore = 24000; text = `三倍満 24000点 (${han}翻)`; }
+      else if (han >= 8)  { rawScore = 16000; text = `倍満 16000点 (${han}翻)`; }
+      else if (han >= 6)  { rawScore = 12000; text = `跳満 12000点 (${han}翻)`; }
+      else if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+        rawScore = 12000; text = `親満貫 12000点 (${han}翻${fu}符)`;
+      } else {
+        let basePoint = fu * Math.pow(2, han + 2);
+        rawScore = Math.ceil((basePoint * 6) / 100) * 100;
+        text = `親 ${rawScore}点 [${han}翻${fu}符]`;
+      }
+      return { rawScore, scoreText: text };
+    }
+
+    // --- オンラインランキング通信処理 (Supabase) ---
+    async function saveGlobalScore(playerName, turnNum, remHp, scoreVal, scoreText, yakuText) {
+      document.getElementById('msg-error').innerText = '';
+      if (!supabaseClient) {
+        document.getElementById('msg-error').innerText = '⚠️ Supabase接続設定がされていません。';
+        return;
+      }
+
+      // ポイント算出: 点数 × 残りHP / 打牌数
+      let calcPoint = Math.round((scoreVal * remHp) / Math.max(1, turnNum));
+
+      const { data, error } = await supabaseClient
+        .from('mahjong_scores')
+        .insert([{
+          player_name: playerName,
+          turn_count: turnNum,
+          remaining_hp: remHp,
+          score_val: scoreVal,
+          score_text: scoreText,
+          yaku_text: yakuText,
+          calc_point: calcPoint
+        }]);
+
+      if (error) {
+        console.error('送信エラー詳細:', error);
+        document.getElementById('msg-error').innerText = `⚠️ ランキング保存エラー: ${error.message}`;
+      } else {
+        fetchGlobalRanking();
+      }
+    }
+
+    async function fetchGlobalRanking() {
+      const listEl = document.getElementById('ranking-list');
+      if (!supabaseClient) {
+        listEl.innerHTML = '<li class="ranking-item" style="text-align:center;">API設定エラー</li>';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('mahjong_scores')
+        .select('*')
+        .order('calc_point', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('取得エラー:', error);
+        listEl.innerHTML = `<li class="ranking-item" style="text-align:center;">取得失敗</li>`;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      if (!data || data.length === 0) {
+        listEl.innerHTML = '<li class="ranking-item" style="text-align:center;">生存者の記録がありません</li>';
+        return;
+      }
+
+      data.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.className = 'ranking-item';
+        li.innerHTML = `
+          <div class="rank-head">
+            <span>第${idx + 1}位: 残HP ${item.remaining_hp}</span>
+            <span>打牌:${item.turn_count}回</span>
+          </div>
+          <div class="rank-player">👤 ${escapeHTML(item.player_name)} (${item.calc_point} pt)</div>
+          <div class="rank-detail">${item.score_text}</div>
+          <div class="rank-detail" style="color: #ff9999;">役: ${escapeHTML(item.yaku_text)}</div>
+        `;
+        listEl.appendChild(li);
+      });
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    // --- 画面描画 ---
+    function render() {
+      document.getElementById('deck-count').innerText = deck.length;
+      document.getElementById('turn-count').innerText = turn;
+
+      const doraEl = document.getElementById('dora-tile-container');
+      doraEl.innerHTML = '';
+      doraIndicators.forEach(dInd => {
+        doraEl.appendChild(createTileElement(dInd, null, true));
+      });
+
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      let expectedCount = 14 - (kanCount * 3);
+
+      const waitsContainer = document.getElementById('waits-container');
+      waitsContainer.innerHTML = '';
+      if (!isGameOver) {
+        let currentHandTiles = fullTiles.length === expectedCount ? hand : fullTiles;
+        let waits = checkTenpai(currentHandTiles);
+        if (waits.length > 0) {
+          waits.forEach(wTile => {
+            waitsContainer.appendChild(createTileElement(wTile, null, true));
+          });
+        } else {
+          waitsContainer.innerText = 'ノーテン';
+        }
+      }
+
+      const btnKan = document.getElementById('btn-kan');
+      let tileCounts = getTileCounts(fullTiles);
+      let canKan = (fullTiles.length === expectedCount) && Object.values(tileCounts).some(cnt => cnt === 4);
+      btnKan.style.display = (canKan && !isGameOver) ? 'inline-block' : 'none';
+
+      const btnWin = document.getElementById('btn-win');
+      if (fullTiles.length === expectedCount && checkWin(fullTiles) && !isGameOver) {
+        btnWin.classList.add('btn-win-glow');
+      } else {
+        btnWin.classList.remove('btn-win-glow');
+      }
+
+      let riichiDiscardIndices = [];
+      if (!isRiichi && !isGameOver && fullTiles.length === expectedCount) {
+        riichiDiscardIndices = getTenpaiDiscards(hand, drawnTile);
+      }
+
+      const btnRiichi = document.getElementById('btn-riichi');
+      if (!isRiichi && riichiDiscardIndices.length > 0 && !isRiichiSelecting) {
+        btnRiichi.disabled = false;
+      } else if (!isRiichiSelecting) {
+        btnRiichi.disabled = true;
+      }
+
+      const handEl = document.getElementById('hand');
+      handEl.innerHTML = '';
+      hand.forEach((tile, idx) => {
+        let isTarget = isRiichiSelecting && riichiDiscardIndices.includes(idx);
+        handEl.appendChild(createTileElement(tile, () => handleTileClick(idx, false), false, isTarget));
+      });
+
+      const drawnEl = document.getElementById('drawn-tile');
+      drawnEl.innerHTML = '';
+      if (drawnTile) {
+        let isTarget = isRiichiSelecting && riichiDiscardIndices.includes(hand.length);
+        drawnEl.appendChild(createTileElement(drawnTile, () => handleTileClick(null, true), false, isTarget));
+      }
+
+      const riverEl = document.getElementById('river');
+      riverEl.innerHTML = '';
+      river.forEach(tile => {
+        riverEl.appendChild(createTileElement(tile, null, true));
+      });
+    }
+
+    function handleTileClick(index, isDrawn) {
+      if (isGameOver) return;
+      if (isRiichi && !isDrawn) { playSE('error'); return; }
+      discard(index, isDrawn);
+    }
+
+    function createTileElement(tile, onClick, isSmall = false, isRiichiTarget = false) {
+      const el = document.createElement('div');
+      el.className = 'tile';
+      if (isSmall) el.classList.add('small');
+      if (isRiichiTarget) el.classList.add('riichi-target');
+      if (tile.isAka) el.classList.add('aka-dora');
+
+      let colorClass = 'black';
+      let displayText = '', typeText = '';
+
+      if (tile.type === 'z') {
+        displayText = HONORS[tile.val - 1];
+        if (tile.val === 6) colorClass = 'green';
+        else if (tile.val === 7) colorClass = 'red';
+      } else {
+        displayText = tile.val;
+        typeText = SUITS[tile.type];
+        if (tile.type === 'm') colorClass = 'red';
+        if (tile.type === 's') colorClass = 'green';
+      }
+
+      el.classList.add(colorClass);
+      el.innerHTML = `<span class="tile-num">${displayText}</span>${typeText ? `<span class="tile-type">${typeText}</span>` : ''}`;
+
+      if (onClick) el.addEventListener('click', onClick);
+      return el;
+    }
+
+    function showMessage(title, yaku, score) {
+      document.getElementById('msg-title').innerText = title;
+      document.getElementById('msg-yaku').innerText = yaku;
+      document.getElementById('msg-score').innerText = score;
+    }
+
+    function clearMessages() { 
+      showMessage('', '', '');
+      document.getElementById('msg-error').innerText = '';
+    }
+
+    initGame();
+  </script>
+</body>
+</html>
