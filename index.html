@@ -383,7 +383,7 @@
       100% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0); }
     }
 
-    /* ✨ 爆発・飛び演出用アニメーション */
+    /* 爆発・飛び演出用アニメーション */
     .tile.destroying {
       animation: popDestroyAnim 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
       z-index: 50;
@@ -395,7 +395,7 @@
       100% { transform: scale(0.2) translateY(-60px) rotate(25deg); opacity: 0; filter: brightness(2); }
     }
 
-    /* 🀄 上からスッと落ちてフードインで入る演出 */
+    /* 上からスッと落ちてフェードインで入る演出 */
     .tile.slide-in {
       animation: slideInAnim 0.55s ease-out forwards;
     }
@@ -405,7 +405,7 @@
       100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
-    /* 🌟 新しく補充された牌の枠線ハイライト */
+    /* 新しく補充された牌の枠線ハイライト */
     .tile.new-drawn {
       border: 2px solid #00bfa5 !important;
       box-shadow: 0 0 10px rgba(0, 191, 165, 0.6) !important;
@@ -486,17 +486,20 @@
     .score-detail { font-size: 14px; color: #009688; font-weight: bold; }
     .error-msg { font-size: 12px; color: #e53935; margin-top: 4px; }
 
-    /* モーダル＆ミニゲーム 画面全域最前面表示（重なり防止） */
+    /* 💡 修正：モーダルを確実に画面全体へ正しく固定表示（ズレ防止） */
     .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
       background: rgba(30, 20, 25, 0.96);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 10px;
-      z-index: 9999;
+      z-index: 99999 !important;
       padding: 15px;
       text-align: center;
       overflow-y: auto;
@@ -643,7 +646,7 @@
       <ul>
         <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
         <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
-        <li><b>ドラDiscardのペナルティ</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>ドラDiscardのペンダント</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
         <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
         <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
         <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
@@ -719,13 +722,6 @@
         <button onclick="sortHand()">理牌</button>
         <button onclick="initGame()">最初から</button>
       </div>
-
-      <!-- 汎用オーバーレイ / ミニゲーム画面 -->
-      <div id="game-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-title" id="modal-title">イベント発生</div>
-        <div class="modal-desc" id="modal-desc">説明文</div>
-        <div id="modal-content"></div>
-      </div>
     </div>
 
     <!-- 折りたたみ式 ランキングボード（全員表示） -->
@@ -743,6 +739,13 @@
         </div>
       </div>
     </details>
+  </div>
+
+  <!-- 汎用オーバーレイ / ミニゲーム画面（画面全体を覆うように移動） -->
+  <div id="game-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-title" id="modal-title">イベント発生</div>
+    <div class="modal-desc" id="modal-desc">説明文</div>
+    <div id="modal-content"></div>
   </div>
 
   <!-- フッター -->
@@ -1143,7 +1146,6 @@
       render(newAddedIds, []);
     }
 
-    // ✨ 爆発・飛びエフェクトとフェードインの連動処理
     function removeRandomTiles(num, callback) {
       playSE('destroy');
       let targetTileIds = [];
@@ -1164,7 +1166,6 @@
         }
       }
 
-      // 1. 爆発対象の牌に `.destroying` アニメーションを付与
       let allTileElements = document.querySelectorAll('.tile');
       allTileElements.forEach(el => {
         let tileId = parseInt(el.dataset.id);
@@ -1173,7 +1174,6 @@
         }
       });
 
-      // 2. 爆発アニメーション終了後（700ms後）に新牌をフェードイン表示
       setTimeout(() => {
         sortTiles(hand);
         render(newAddedTileIds, []);
@@ -1280,7 +1280,6 @@
       }
     }
 
-    // ✨ 面子犠牲時の爆発＋追加牌の上からのフェードイン演出
     function execSacrificeMentsu(mentsuObj) {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
@@ -1291,10 +1290,8 @@
       playSE('destroy');
       lastSacrificeTurn = turn;
 
-      // 1. 消滅対象面子のIDを特定
       let destroyIds = mentsuObj.tiles.map(t => t.id);
 
-      // 手牌要素に爆発アニメーションを適用
       let allTileEls = document.querySelectorAll('.tile');
       allTileEls.forEach(el => {
         let id = parseInt(el.dataset.id);
@@ -1303,7 +1300,6 @@
         }
       });
 
-      // 2. 爆発演出後に手牌から削除し、新しい牌を追加
       setTimeout(() => {
         mentsuObj.tiles.forEach(target => {
           if (drawnTile && drawnTile.id === target.id) {
@@ -2006,7 +2002,6 @@
       );
     }
 
-    // --- 画面描画 (新追加牌のフェードイン＆ハイライト制御付き) ---
     function render(newAddedIds = [], destroyIds = []) {
       document.getElementById('deck-count').innerText = deck.length;
       document.getElementById('turn-count').innerText = turn;
@@ -2083,7 +2078,6 @@
         btnRiichi.disabled = true;
       }
 
-      // 手牌描画（上からスッとフェードイン＋光演出）
       const handEl = document.getElementById('hand');
       handEl.innerHTML = '';
       hand.forEach((tile, idx) => {
@@ -2095,7 +2089,6 @@
         handEl.appendChild(el);
       });
 
-      // ツモ牌描画
       const drawnEl = document.getElementById('drawn-tile');
       drawnEl.innerHTML = '';
       if (drawnTile) {
@@ -2129,12 +2122,11 @@
       if (isRiichiTarget) el.classList.add('riichi-target');
       if (tile.isAka) el.classList.add('aka-dora');
 
-      // ✨ フェードイン・ハイライト・爆発アニメーション用クラス適用
       if (isDestroy) el.classList.add('destroying');
       if (isNew) {
         el.classList.add('slide-in');
         el.classList.add('new-drawn');
-        setTimeout(() => el.classList.remove('new-drawn'), 2000); // 2秒後に緑枠ハイライト消去
+        setTimeout(() => el.classList.remove('new-drawn'), 2000);
       }
 
       let colorClass = 'black';
