@@ -294,11 +294,12 @@
     .modal-title { font-size: 18px; font-weight: bold; color: #ff4444; text-shadow: 0 0 8px #ff0000; }
     .modal-desc { font-size: 13px; color: #cccccc; margin-bottom: 5px; }
 
-    /* ミニゲーム用エレメント */
+    /* ミニゲーム用エレメント（拡張＆レスポンシブ対応） */
     #dodge-canvas {
       background: #000;
       border: 2px solid #ff0000;
       box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+      max-width: 100%;
     }
     .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 300px; }
     .quiz-btn { background: #331111; border: 1px solid #ff4444; color: #fff; padding: 10px; border-radius: 6px; cursor: pointer; }
@@ -470,7 +471,7 @@
     let hp = 1000;
     const MAX_HP = 1000;
 
-    // クイズデータベース（難易度高めの2択クイズ100問）
+    // クイズデータベース（100問対応）
     const QUIZ_DB = [
       { q: "麻雀の「ローカル役」で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
       { q: "光の速度はどっちが近い？", a: "秒速30万km", b: "秒速300万km", ans: "a" },
@@ -488,7 +489,6 @@
       { q: "タコの心臓の数は？", a: "3つ", b: "1つ", ans: "a" },
       { q: "キリンの首の骨の数は？", a: "7個", b: "12個", ans: "a" }
     ];
-    // 100個まで自動拡張生成（デモ用汎用難度補正）
     for(let i=QUIZ_DB.length; i<100; i++) {
       let n1 = Math.floor(Math.random()*89)+10;
       let n2 = Math.floor(Math.random()*89)+10;
@@ -663,18 +663,14 @@
       playSE('event');
       let r = Math.random();
       if (r < 0.25) {
-        // イベント1: 全手牌交換
         openModal("😈 災難イベント", "手牌がすべて山牌と入れ替わりました！", "<div>手牌リセット！</div>");
         shuffleAllHandTiles();
         setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
       } else if (r < 0.50) {
-        // イベント2: 突如クイズ
         startQuizEvent(() => { drawTile(); render(); });
       } else if (r < 0.75) {
-        // イベント3: 避けるゲーム
         startDodgeGame(() => { drawTile(); render(); });
       } else {
-        // イベント4: フラッシュ暗算
         startFlashMathEvent(() => { drawTile(); render(); });
       }
     }
@@ -683,7 +679,6 @@
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
-      // コイントス3回
       openModal("リーチさせると思ったか？", "コイントスで3回連続【表】を出せばリーチ許可！失敗で牌が3つ消滅！", "<div id='coin-area'><div class='coin-img'>🪙</div><button onclick='execCoinToss()' style='margin-top:10px;'>コインを投げる</button></div>");
     }
 
@@ -728,14 +723,10 @@
       }
 
       playSE('event');
-      // 第1関門: 回避ゲーム
       openModal("上がらせると思ったか？ (1/3)", "第1試練：10秒間弾幕を回避せよ！失敗すると牌が5個飛ぶ！", "");
       startDodgeGame(() => {
-        // 第2関門: クイズ
         startQuizEvent(() => {
-          // 第3関門: フラッシュ暗算
           startFlashMathEvent(() => {
-            // 全クリアでついにアガリ！
             checkAgariFinal();
           });
         });
@@ -767,8 +758,8 @@
       let q = QUIZ_DB[Math.floor(Math.random() * QUIZ_DB.length)];
       openModal("🧠 突如クイズ！", q.q, `
         <div class="quiz-options">
-          <button class="quiz-btn" onclick="checkQuizAns('a', '${q.ans}', ${onSuccess.name})">${q.a}</button>
-          <button class="quiz-btn" onclick="checkQuizAns('b', '${q.ans}', ${onSuccess.name})">${q.b}</button>
+          <button class="quiz-btn" onclick="checkQuizAns('a', '${q.ans}')">${q.a}</button>
+          <button class="quiz-btn" onclick="checkQuizAns('b', '${q.ans}')">${q.b}</button>
         </div>
       `);
       window.currentQuizSuccess = onSuccess;
@@ -785,11 +776,11 @@
       }
     }
 
-    // --- ミニゲーム 2: アンダーテール風 回避ゲーム ---
+    // --- ミニゲーム 2: アンダーテール風 回避ゲーム（広画面＆速度低減版） ---
     function startDodgeGame(onSuccess) {
       openModal("⚡ 回避ゲーム！", "5秒後に開始！キーボード【矢印キー】で赤枠を動かし10秒間弾を避けろ！", `
-        <div id="dodge-timer" style="font-size:20px; color:#ff3333; font-weight:bold;">5</div>
-        <canvas id="dodge-canvas" width="260" height="200"></canvas>
+        <div id="dodge-timer" style="font-size:20px; color:#ff3333; font-weight:bold; margin-bottom:5px;">5</div>
+        <canvas id="dodge-canvas" width="360" height="280"></canvas>
       `);
 
       let count = 5;
@@ -809,18 +800,19 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      let px = 120, py = 90, pSize = 12;
+      let px = 170, py = 130, pSize = 14;
       let bullets = [];
       let keys = {};
       let duration = 10.0;
       let gameActive = true;
 
-      for(let i=0; i<15; i++) {
+      // 弾の生成速度をマイルドに調整 (1.8)
+      for(let i = 0; i < 18; i++) {
         bullets.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 4,
-          vy: (Math.random() - 0.5) * 4
+          vx: (Math.random() - 0.5) * 1.8,
+          vy: (Math.random() - 0.5) * 1.8
         });
       }
 
@@ -838,10 +830,10 @@
         let timerEl = document.getElementById('dodge-timer');
         if (timerEl) timerEl.innerText = `残り: ${Math.max(0, duration).toFixed(1)}秒`;
 
-        if (keys['ArrowUp'] && py > 0) py -= 3;
-        if (keys['ArrowDown'] && py < canvas.height - pSize) py += 3;
-        if (keys['ArrowLeft'] && px > 0) px -= 3;
-        if (keys['ArrowRight'] && px < canvas.width - pSize) px += 3;
+        if (keys['ArrowUp'] && py > 0) py -= 3.5;
+        if (keys['ArrowDown'] && py < canvas.height - pSize) py += 3.5;
+        if (keys['ArrowLeft'] && px > 0) px -= 3.5;
+        if (keys['ArrowRight'] && px < canvas.width - pSize) px += 3.5;
 
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -851,7 +843,7 @@
         ctx.lineWidth = 2;
         ctx.strokeRect(px, py, pSize, pSize);
 
-        // 弾
+        // 弾描画
         ctx.fillStyle = '#ffffff';
         for (let b of bullets) {
           b.x += b.vx; b.y += b.vy;
@@ -859,7 +851,7 @@
           if (b.y < 0 || b.y > canvas.height) b.vy *= -1;
 
           ctx.beginPath();
-          ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
+          ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
           ctx.fill();
 
           // 当たり判定
@@ -907,7 +899,7 @@
             clearInterval(interval);
             if (box) box.innerHTML = `
               <input type="number" id="flash-ans" class="flash-input" placeholder="合計">
-              <button onclick="checkFlashAns(${sum}, ${onSuccess.name})" style="margin-left:5px;">回答</button>
+              <button onclick="checkFlashAns(${sum})" style="margin-left:5px;">回答</button>
             `;
             window.currentFlashSuccess = onSuccess;
           }
@@ -1159,7 +1151,7 @@
       return { rawScore, scoreText: text };
     }
 
-    // --- オンラインランキング通信処理 (Supabase) ---
+    // --- オンラインランキング通信処理 (新テーブル：impossible_mahjong_scores) ---
     async function saveGlobalScore(playerName, turnNum, remHp, scoreVal, scoreText, yakuText) {
       document.getElementById('msg-error').innerText = '';
       if (!supabaseClient) {
@@ -1167,11 +1159,10 @@
         return;
       }
 
-      // ポイント算出: 点数 × 残りHP / 打牌数
       let calcPoint = Math.round((scoreVal * remHp) / Math.max(1, turnNum));
 
       const { data, error } = await supabaseClient
-        .from('impossible_mahjong_score')
+        .from('impossible_mahjong_scores') // 新テーブル名に変更済み
         .insert([{
           player_name: playerName,
           turn_count: turnNum,
@@ -1198,7 +1189,7 @@
       }
 
       const { data, error } = await supabaseClient
-        .from('impossible_mahjong_score')
+        .from('impossible_mahjong_scores') // 新テーブル名に変更済み
         .select('*')
         .order('calc_point', { ascending: false })
         .limit(10);
