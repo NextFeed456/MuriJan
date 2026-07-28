@@ -252,6 +252,7 @@
     button:disabled { background-color: #4a3030; box-shadow: 0 3px 0 #2a1818; cursor: not-allowed; opacity: 0.6; }
     button.btn-riichi { background-color: #e74c3c; box-shadow: 0 3px 0 #922b21; }
     button.btn-kan { background-color: #8e44ad; box-shadow: 0 3px 0 #5b2c6f; }
+    button.btn-sacrifice { background-color: #27ae60; box-shadow: 0 3px 0 #1e8449; }
 
     button.btn-win-glow {
       background-color: #e74c3c !important;
@@ -294,13 +295,43 @@
     .modal-title { font-size: 18px; font-weight: bold; color: #ff4444; text-shadow: 0 0 8px #ff0000; }
     .modal-desc { font-size: 13px; color: #cccccc; margin-bottom: 5px; }
 
-    /* ミニゲーム用エレメント（拡張＆レスポンシブ対応） */
     #dodge-canvas {
       background: #000;
       border: 2px solid #ff0000;
       box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
       max-width: 100%;
     }
+
+    /* スマホ用 十字キーUIスタイル */
+    .dpad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 45px);
+      grid-template-rows: repeat(2, 45px);
+      gap: 5px;
+      margin-top: 8px;
+      justify-content: center;
+      user-select: none;
+    }
+    .dpad-btn {
+      background: #441111;
+      border: 1px solid #ff4444;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #220000;
+      touch-action: manipulation;
+    }
+    .dpad-btn:active {
+      background: #882222;
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
     .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 300px; }
     .quiz-btn { background: #331111; border: 1px solid #ff4444; color: #fff; padding: 10px; border-radius: 6px; cursor: pointer; }
     .quiz-btn:hover { background: #661111; }
@@ -309,6 +340,18 @@
     .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #222; border: 1px solid #ff4444; color: white; }
 
     .coin-img { font-size: 50px; transition: transform 0.5s; }
+
+    .mentsu-option-btn {
+      display: flex;
+      gap: 4px;
+      background: #222;
+      border: 1px solid #2ecc71;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 6px;
+    }
+    .mentsu-option-btn:hover { background: #333; }
   </style>
 </head>
 <body>
@@ -364,6 +407,7 @@
       </div>
 
       <div class="controls">
+        <button id="btn-sacrifice" class="btn-sacrifice" onclick="onClickSacrificeButton()" style="display:none;">面子捧げて回復</button>
         <button id="btn-kan" class="btn-kan" onclick="onClickKanButton()" style="display:none;">カン</button>
         <button id="btn-riichi" class="btn-riichi" onclick="startRiichiSelect()" disabled>リーチ</button>
         <button id="btn-win" onclick="startAgariSequence()">ツモアガリ</button>
@@ -425,6 +469,11 @@
         osc.frequency.linearRampToValueAtTime(40, now + 0.2);
         gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'heal') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
+        gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
       } else if (type === 'event') {
         osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
         osc.frequency.setValueAtTime(600, now + 0.1);
@@ -471,7 +520,9 @@
     let hp = 1000;
     const MAX_HP = 1000;
 
-    // クイズデータベース（100問対応）
+    let keys = {};
+
+    // クイズデータベース
     const QUIZ_DB = [
       { q: "麻雀の「ローカル役」で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
       { q: "光の速度はどっちが近い？", a: "秒速30万km", b: "秒速300万km", ans: "a" },
@@ -525,6 +576,13 @@
       }
     }
 
+    // ★ 牌がドラ（赤ドラ含む）かどうか判定する関数
+    function isTileDora(tile) {
+      if (!tile) return false;
+      if (tile.isAka) return true;
+      return actualDoraTiles.some(dt => dt.type === tile.type && dt.val === tile.val);
+    }
+
     function updateHP(amount) {
       hp += amount;
       if (hp > MAX_HP) hp = MAX_HP;
@@ -558,12 +616,22 @@
       fetchGlobalRanking();
     }
 
+    // --- ツモ＆山札リセット処理 ---
     function drawTile() {
       if (deck.length === 0) {
-        showMessage('流局', '山牌がなくなりました。', '');
-        isGameOver = true;
-        drawnTile = null;
-        return;
+        if (river.length > 0) {
+          playSE('heal');
+          deck = [...river].sort(() => Math.random() - 0.5);
+          river = [];
+          updateHP(500);
+          openModal("🔄 山札リセット！", "捨て牌が全て山札に戻り、シャッフルされました！HPが500回復！", "");
+          setTimeout(() => closeModal(), 1800);
+        } else {
+          showMessage('流局', '引ける牌が完全になくなりました。', '');
+          isGameOver = true;
+          drawnTile = null;
+          return;
+        }
       }
       drawnTile = deck.pop();
 
@@ -590,7 +658,6 @@
       render();
     }
 
-    // --- 打牌＆各種乱入イベント判定 ---
     function discard(index, isDrawn, isFree = false) {
       if (isGameOver) return;
       if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
@@ -611,9 +678,10 @@
       river.push(discarded);
       playSE('discard');
 
-      // HP減少処理
+      // ★ ドラを捨てた場合は100減少、通常は50減少
       if (!isFree) {
-        updateHP(-50);
+        let dmg = isTileDora(discarded) ? -100 : -50;
+        updateHP(dmg);
         playSE('damage');
         if (isGameOver) { render(); return; }
       }
@@ -628,7 +696,6 @@
       turn++;
       render();
 
-      // 10打牌ごとのランダムイベントチェック
       if (turn > 0 && turn % 10 === 0) {
         triggerRandom10Event();
       } else {
@@ -637,7 +704,6 @@
       }
     }
 
-    // --- ランダム牌影響関数（HP減少なし） ---
     function shuffleAllHandTiles() {
       let count = hand.length + (drawnTile ? 1 : 0);
       hand = [];
@@ -658,7 +724,174 @@
       sortTiles(hand);
     }
 
-    // --- 10打牌ごとのランダムイベント ---
+    // --- 面子犠牲（HP回復）システム ---
+    function findAvailableMentsu(tiles) {
+      let counts = getTileCounts(tiles);
+      let list = [];
+
+      // 刻子 (333など)
+      for (let k in counts) {
+        if (counts[k] >= 3) {
+          let [type, valStr] = k.split('_'), val = parseInt(valStr);
+          // 手牌から該当する実際の牌オブジェクトを取得（赤ドラなどの状態を保持するため）
+          let matched = tiles.filter(t => t.type === type && t.val === val).slice(0, 3);
+          list.push({ type: 'kotsu', tiles: matched });
+        }
+      }
+
+      // 順子 (123など)
+      ['m', 'p', 's'].forEach(type => {
+        for (let n = 1; n <= 7; n++) {
+          let t1 = tiles.find(t => t.type === type && t.val === n);
+          let t2 = tiles.find(t => t.type === type && t.val === n + 1);
+          let t3 = tiles.find(t => t.type === type && t.val === n + 2);
+          if (t1 && t2 && t3) {
+            list.push({ type: 'shuntsu', tiles: [t1, t2, t3] });
+          }
+        }
+      });
+      return list;
+    }
+
+    function onClickSacrificeButton() {
+      if (isGameOver) return;
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      let mentsuList = findAvailableMentsu(fullTiles);
+      if (mentsuList.length === 0) return;
+
+      if (mentsuList.length === 1) {
+        execSacrificeMentsu(mentsuList[0]);
+      } else {
+        let html = '<div style="display:flex; flex-direction:column; gap:6px;">';
+        mentsuList.forEach((m, idx) => {
+          let hasDora = m.tiles.some(t => isTileDora(t));
+          let healAmt = hasDora ? 500 : 300;
+          html += `<div class="mentsu-option-btn" onclick="closeModal(); execSacrificeMentsuByIndex(${idx});">`;
+          m.tiles.forEach(t => {
+            let el = createTileElement(t, null, true);
+            html += el.outerHTML;
+          });
+          html += `<span style="align-self:center; margin-left:8px; color:${hasDora ? '#f1c40f' : '#2ecc71'}; font-weight:bold;">を犠牲(+${healAmt})</span></div>`;
+        });
+        html += '</div>';
+        window.currentMentsuList = mentsuList;
+        openModal("犠牲にする面子を選択", "ドラを含む面子はHPが500回復します！", html);
+      }
+    }
+
+    function execSacrificeMentsuByIndex(idx) {
+      if (window.currentMentsuList && window.currentMentsuList[idx]) {
+        execSacrificeMentsu(window.currentMentsuList[idx]);
+      }
+    }
+
+    function execSacrificeMentsu(mentsuObj) {
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      // ★ ドラが含まれているかチェックして回復量を決定 (ドラ含む: 500 / 通常: 300)
+      let hasDora = mentsuObj.tiles.some(t => isTileDora(t));
+      let healAmount = hasDora ? 500 : 300;
+
+      // 該当する3枚を1枚ずつ削除
+      mentsuObj.tiles.forEach(target => {
+        if (drawnTile && drawnTile.type === target.type && drawnTile.val === target.val && drawnTile.isAka === target.isAka) {
+          drawnTile = null;
+        } else {
+          let idx = hand.findIndex(t => t.type === target.type && t.val === target.val && t.isAka === target.isAka);
+          if (idx !== -1) hand.splice(idx, 1);
+        }
+      });
+
+      playSE('heal');
+      updateHP(healAmount);
+
+      for(let i = 0; i < 3; i++) {
+        if (deck.length > 0) hand.push(deck.pop());
+      }
+      sortTiles(hand);
+      
+      if (!drawnTile && deck.length > 0) {
+        drawnTile = deck.pop();
+      }
+
+      openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを犠牲にして' : ''}HPが ${healAmount} 回復しました！`, "");
+      setTimeout(() => { closeModal(); render(); }, 1500);
+    }
+
+    // --- カン機能（回復量調整追加） ---
+    function onClickKanButton() {
+      if (isGameOver) return;
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      let counts = getTileCounts(fullTiles);
+      let kanKeys = Object.keys(counts).filter(k => counts[k] === 4);
+
+      if (kanKeys.length === 0) return;
+
+      if (kanKeys.length === 1) {
+        execKan(kanKeys[0]);
+      } else {
+        showKanModal(kanKeys);
+      }
+    }
+
+    function showKanModal(kanKeys) {
+      let html = '<div style="display:flex; gap:10px;">';
+      kanKeys.forEach(key => {
+        let [type, valStr] = key.split('_');
+        html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
+      });
+      html += '</div>';
+      openModal("どの牌をカンしますか？", "", html);
+    }
+
+    function execKan(kanKey) {
+      let [type, valStr] = kanKey.split('_');
+      let val = parseInt(valStr);
+
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
+      // カンする対象の4枚を取得
+      let targetTiles = fullTiles.filter(t => t.type === type && t.val === val);
+      let hasDora = targetTiles.some(t => isTileDora(t));
+      let healAmount = hasDora ? 500 : 300; // ★ ドラを含むカンなら500回復、通常300
+
+      if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
+        drawnTile = null;
+      }
+      hand = hand.filter(t => !(t.type === type && t.val === val));
+
+      kanCount++;
+      playSE('heal');
+      updateHP(healAmount); // ★ カンでHP回復！
+
+      if (deck.length > 0) {
+        let newDoraInd = deck.pop();
+        doraIndicators.push(newDoraInd);
+        actualDoraTiles.push(getDoraFromIndicator(newDoraInd));
+      }
+
+      if (kanCount >= 4) {
+        showMessage('流局（四開槓）', 'カンが4回行われたため流局となりました。', '');
+        isGameOver = true;
+        render();
+        return;
+      }
+
+      openModal("🀄 カン！", `${hasDora ? '🐉 ドラカン！' : ''}HPが ${healAmount} 回復しました！`, "");
+      setTimeout(() => {
+        closeModal();
+        drawTile();
+        render();
+      }, 1200);
+    }
+
+    // --- 各種イベント ---
     function triggerRandom10Event() {
       playSE('event');
       let r = Math.random();
@@ -675,7 +908,6 @@
       }
     }
 
-    // --- リーチイベント ---
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
@@ -708,7 +940,6 @@
       }
     }
 
-    // --- ツモアガリ時 怒涛の3連絶望イベント ---
     function startAgariSequence() {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
@@ -753,7 +984,6 @@
       }
     }
 
-    // --- ミニゲーム 1: クイズ ---
     function startQuizEvent(onSuccess) {
       let q = QUIZ_DB[Math.floor(Math.random() * QUIZ_DB.length)];
       openModal("🧠 突如クイズ！", q.q, `
@@ -776,11 +1006,22 @@
       }
     }
 
-    // --- ミニゲーム 2: アンダーテール風 回避ゲーム（広画面＆速度低減版） ---
+    function setTouchKey(key, state) {
+      keys[key] = state;
+    }
+
     function startDodgeGame(onSuccess) {
-      openModal("⚡ 回避ゲーム！", "5秒後に開始！キーボード【矢印キー】で赤枠を動かし10秒間弾を避けろ！", `
+      openModal("⚡ 回避ゲーム！", "5秒後に開始！【矢印キー】または下部の【ボタン】で赤枠を動かして避けろ！", `
         <div id="dodge-timer" style="font-size:20px; color:#ff3333; font-weight:bold; margin-bottom:5px;">5</div>
-        <canvas id="dodge-canvas" width="360" height="280"></canvas>
+        <canvas id="dodge-canvas" width="360" height="240"></canvas>
+        <div class="dpad-container">
+          <div></div>
+          <div class="dpad-btn" onmousedown="setTouchKey('ArrowUp', true)" onmouseup="setTouchKey('ArrowUp', false)" ontouchstart="setTouchKey('ArrowUp', true); event.preventDefault();" ontouchend="setTouchKey('ArrowUp', false)">▲</div>
+          <div></div>
+          <div class="dpad-btn" onmousedown="setTouchKey('ArrowLeft', true)" onmouseup="setTouchKey('ArrowLeft', false)" ontouchstart="setTouchKey('ArrowLeft', true); event.preventDefault();" ontouchend="setTouchKey('ArrowLeft', false)">◄</div>
+          <div class="dpad-btn" onmousedown="setTouchKey('ArrowDown', true)" onmouseup="setTouchKey('ArrowDown', false)" ontouchstart="setTouchKey('ArrowDown', true); event.preventDefault();" ontouchend="setTouchKey('ArrowDown', false)">▼</div>
+          <div class="dpad-btn" onmousedown="setTouchKey('ArrowRight', true)" onmouseup="setTouchKey('ArrowRight', false)" ontouchstart="setTouchKey('ArrowRight', true); event.preventDefault();" ontouchend="setTouchKey('ArrowRight', false)">►</div>
+        </div>
       `);
 
       let count = 5;
@@ -800,13 +1041,15 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      let px = 170, py = 130, pSize = 14;
+      let px = 170, py = 110, pSize = 14;
       let bullets = [];
-      let keys = {};
       let duration = 10.0;
       let gameActive = true;
 
-      // 弾の生成速度をマイルドに調整 (1.8)
+      const keyHandler = (e) => { keys[e.key] = e.type === 'keydown'; };
+      window.addEventListener('keydown', keyHandler);
+      window.addEventListener('keyup', keyHandler);
+
       for(let i = 0; i < 18; i++) {
         bullets.push({
           x: Math.random() * canvas.width,
@@ -815,10 +1058,6 @@
           vy: (Math.random() - 0.5) * 1.8
         });
       }
-
-      const keyHandler = (e) => { keys[e.key] = e.type === 'keydown'; };
-      window.addEventListener('keydown', keyHandler);
-      window.addEventListener('keyup', keyHandler);
 
       let lastTime = performance.now();
       function loop(now) {
@@ -830,20 +1069,19 @@
         let timerEl = document.getElementById('dodge-timer');
         if (timerEl) timerEl.innerText = `残り: ${Math.max(0, duration).toFixed(1)}秒`;
 
-        if (keys['ArrowUp'] && py > 0) py -= 3.5;
-        if (keys['ArrowDown'] && py < canvas.height - pSize) py += 3.5;
-        if (keys['ArrowLeft'] && px > 0) px -= 3.5;
-        if (keys['ArrowRight'] && px < canvas.width - pSize) px += 3.5;
+        const speed = 2.5;
+        if (keys['ArrowUp'] && py > 0) py -= speed;
+        if (keys['ArrowDown'] && py < canvas.height - pSize) py += speed;
+        if (keys['ArrowLeft'] && px > 0) px -= speed;
+        if (keys['ArrowRight'] && px < canvas.width - pSize) px += speed;
 
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 自機 (赤枠)
         ctx.strokeStyle = '#ff0000';
         ctx.lineWidth = 2;
         ctx.strokeRect(px, py, pSize, pSize);
 
-        // 弾描画
         ctx.fillStyle = '#ffffff';
         for (let b of bullets) {
           b.x += b.vx; b.y += b.vy;
@@ -854,11 +1092,11 @@
           ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
           ctx.fill();
 
-          // 当たり判定
           if (px < b.x + 4 && px + pSize > b.x - 4 && py < b.y + 4 && py + pSize > b.y - 4) {
             gameActive = false;
             window.removeEventListener('keydown', keyHandler);
             window.removeEventListener('keyup', keyHandler);
+            keys = {};
             openModal("💥 被弾！", "回避失敗！罰として牌が5個飛びました！", "");
             removeRandomTiles(5);
             setTimeout(() => { closeModal(); render(); }, 1500);
@@ -870,6 +1108,7 @@
           gameActive = false;
           window.removeEventListener('keydown', keyHandler);
           window.removeEventListener('keyup', keyHandler);
+          keys = {};
           openModal("✨ 回避成功！", "見事に避け切りました！", "");
           setTimeout(() => { closeModal(); onSuccess(); }, 1000);
           return;
@@ -880,7 +1119,6 @@
       requestAnimationFrame(loop);
     }
 
-    // --- ミニゲーム 3: フラッシュ暗算 ---
     function startFlashMathEvent(onSuccess) {
       openModal("⚡ フラッシュ暗算", "表示される5個の1桁の数字の合計を答えろ！", "<div id='flash-box' class='flash-num'>READY...</div>");
 
@@ -919,7 +1157,6 @@
       }
     }
 
-    // --- モーダル制御 ---
     function openModal(title, desc, contentHtml) {
       document.getElementById('modal-title').innerText = title;
       document.getElementById('modal-desc').innerText = desc;
@@ -930,64 +1167,6 @@
       document.getElementById('game-modal').style.display = 'none';
     }
 
-    // --- カン機能 ---
-    function onClickKanButton() {
-      if (isGameOver) return;
-      const fullTiles = [...hand];
-      if (drawnTile) fullTiles.push(drawnTile);
-
-      let counts = getTileCounts(fullTiles);
-      let kanKeys = Object.keys(counts).filter(k => counts[k] === 4);
-
-      if (kanKeys.length === 0) return;
-
-      if (kanKeys.length === 1) {
-        execKan(kanKeys[0]);
-      } else {
-        showKanModal(kanKeys);
-      }
-    }
-
-    function showKanModal(kanKeys) {
-      let html = '<div style="display:flex; gap:10px;">';
-      kanKeys.forEach(key => {
-        let [type, valStr] = key.split('_');
-        html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
-      });
-      html += '</div>';
-      openModal("どの牌をカンしますか？", "", html);
-    }
-
-    function execKan(kanKey) {
-      let [type, valStr] = kanKey.split('_');
-      let val = parseInt(valStr);
-
-      if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
-        drawnTile = null;
-      }
-      hand = hand.filter(t => !(t.type === type && t.val === val));
-
-      kanCount++;
-      playSE('sort');
-
-      if (deck.length > 0) {
-        let newDoraInd = deck.pop();
-        doraIndicators.push(newDoraInd);
-        actualDoraTiles.push(getDoraFromIndicator(newDoraInd));
-      }
-
-      if (kanCount >= 4) {
-        showMessage('流局（四開槓）', 'カンが4回行われたため流局となりました。', '');
-        isGameOver = true;
-        render();
-        return;
-      }
-
-      drawTile();
-      render();
-    }
-
-    // --- 役判定関連アルゴリズム ---
     function getTenpaiDiscards(hand13, currentDrawn) {
       const fullTiles = [...hand13];
       if (currentDrawn) fullTiles.push(currentDrawn);
@@ -1151,7 +1330,7 @@
       return { rawScore, scoreText: text };
     }
 
-    // --- オンラインランキング通信処理 (新テーブル：impossible_mahjong_scores) ---
+    // --- オンラインランキング通信処理 ---
     async function saveGlobalScore(playerName, turnNum, remHp, scoreVal, scoreText, yakuText) {
       document.getElementById('msg-error').innerText = '';
       if (!supabaseClient) {
@@ -1162,7 +1341,7 @@
       let calcPoint = Math.round((scoreVal * remHp) / Math.max(1, turnNum));
 
       const { data, error } = await supabaseClient
-        .from('impossible_mahjong_scores') // 新テーブル名に変更済み
+        .from('impossible_mahjong_scores')
         .insert([{
           player_name: playerName,
           turn_count: turnNum,
@@ -1189,7 +1368,7 @@
       }
 
       const { data, error } = await supabaseClient
-        .from('impossible_mahjong_scores') // 新テーブル名に変更済み
+        .from('impossible_mahjong_scores')
         .select('*')
         .order('calc_point', { ascending: false })
         .limit(10);
@@ -1257,6 +1436,11 @@
           waitsContainer.innerText = 'ノーテン';
         }
       }
+
+      // 面子消費回復ボタンの表示制御
+      const btnSacrifice = document.getElementById('btn-sacrifice');
+      let availableMentsu = findAvailableMentsu(fullTiles);
+      btnSacrifice.style.display = (!isGameOver && availableMentsu.length > 0) ? 'inline-block' : 'none';
 
       const btnKan = document.getElementById('btn-kan');
       let tileCounts = getTileCounts(fullTiles);
