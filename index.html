@@ -15,6 +15,10 @@
     /* ゆるふわベースのスタイル */
     body {
       background-color: #fff5f7;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
       color: #5a4048;
       font-family: 'Hiragino Sans', 'ヒラギノ角ゴ ProN', 'Meiryo', sans-serif;
       display: flex;
@@ -22,7 +26,7 @@
       align-items: center;
       margin: 0;
       padding: 10px;
-      transition: background-color 0.8s ease;
+      transition: background-color 0.8s ease, background-image 0.8s ease;
     }
 
     /* 💀 HP0時のガチデス感スタイル */
@@ -57,14 +61,15 @@
       width: 100%;
       max-width: 800px;
       margin-bottom: 10px;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
       border: 2px solid #ffccd5;
       border-radius: 12px;
       box-shadow: 0 2px 5px rgba(255, 182, 193, 0.3);
       overflow: hidden;
+      backdrop-filter: blur(4px);
     }
     body.death-mode .rules-details {
-      background: #1a0000;
+      background: rgba(26, 0, 0, 0.9);
       border-color: #5a0e0e;
     }
     .rules-summary {
@@ -102,7 +107,7 @@
 
     /* 音量調整バー */
     .volume-container {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
       border: 2px solid #ffccd5;
       border-radius: 20px;
       padding: 4px 15px;
@@ -114,17 +119,34 @@
       align-items: center;
       gap: 8px;
       box-shadow: 0 2px 5px rgba(255, 182, 193, 0.4);
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .volume-container input {
       accent-color: #ff7799;
       cursor: pointer;
     }
 
+    /* BGM切り替えボタン */
+    .bgm-btn {
+      background: #ff7799;
+      color: white;
+      border: none;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .bgm-btn.active {
+      background: #4db6ac;
+    }
+
     /* HPゲージ */
     .hp-container {
       width: 100%;
       max-width: 800px;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
       border: 3px solid #ffb6c1;
       border-radius: 15px;
       padding: 6px 12px;
@@ -132,7 +154,7 @@
       box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
     }
     body.death-mode .hp-container {
-      background: #1a0000;
+      background: rgba(26, 0, 0, 0.9);
       border-color: #880000;
       box-shadow: 0 0 15px #ff0000;
     }
@@ -172,7 +194,7 @@
     }
 
     .game-board {
-      background-color: #fff0f3;
+      background-color: rgba(255, 240, 243, 0.92);
       border: 4px solid #ffb6c1;
       border-radius: 20px;
       flex: 1;
@@ -181,24 +203,26 @@
       padding: 12px;
       box-shadow: 0 8px 15px rgba(255, 182, 193, 0.4);
       position: relative;
+      backdrop-filter: blur(4px);
     }
     body.death-mode .game-board {
-      background-color: #2b0808;
+      background-color: rgba(43, 8, 8, 0.92);
       border-color: #5a0e0e;
       box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
     }
 
     .ranking-board {
-      background-color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.92);
       border: 3px solid #ffccd5;
       border-radius: 20px;
       width: 100%;
       max-width: 800px;
       padding: 12px;
       box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
+      backdrop-filter: blur(4px);
     }
     body.death-mode .ranking-board {
-      background-color: #150000;
+      background-color: rgba(21, 0, 0, 0.92);
       border-color: #5a0e0e;
     }
     .ranking-board h2 {
@@ -418,7 +442,7 @@
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(30, 20, 25, 0.95); /* ★ 視認性向上のため背景を少し暗めに調整 */
+      background: rgba(30, 20, 25, 0.95);
       border-radius: 18px;
       display: flex;
       flex-direction: column;
@@ -430,7 +454,6 @@
       text-align: center;
     }
     body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.95); }
-    /* ★ モーダルタイトルを読みやすいクッキリした白文字に変更 */
     .modal-title {
       font-size: 20px;
       font-weight: bold;
@@ -488,7 +511,26 @@
     .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     .quiz-btn:hover { background: #ffe6ec; }
     
-    .flash-num { font-size: 64px; font-weight: bold; color: #ffffff; text-shadow: 0 0 15px #ff7799; height: 80px; }
+    /* フラッシュ暗算 数字アニメーション演出 */
+    .flash-num {
+      font-size: 64px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 0 15px #ff7799;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .flash-num.pop {
+      animation: flashPop 0.25s ease-out;
+    }
+    @keyframes flashPop {
+      0% { transform: scale(0.6); opacity: 0.3; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
     .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
 
     .coin-img { font-size: 50px; transition: transform 0.5s; }
@@ -508,6 +550,35 @@
       max-width: 340px;
     }
     .mentsu-option-btn:hover { background: #ffe6ec; }
+
+    /* ★ 権利表記＆フッター領域 */
+    .game-footer {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #ffccd5;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 11px;
+      color: #775560;
+      line-height: 1.6;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      backdrop-filter: blur(4px);
+    }
+    body.death-mode .game-footer {
+      background: rgba(20, 0, 0, 0.85);
+      border-color: #5a0e0e;
+      color: #ff8888;
+    }
+    .game-footer strong {
+      color: #ff5577;
+    }
+    body.death-mode .game-footer strong {
+      color: #ff3333;
+    }
   </style>
 </head>
 <body>
@@ -532,11 +603,12 @@
     </div>
   </details>
 
-  <!-- 音量スライダー -->
+  <!-- 音量スライダー＆BGM切替 -->
   <div class="volume-container">
     <span>🔊 音量:</span>
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" oninput="updateVolume(this.value)">
     <span id="volume-text">30%</span>
+    <button id="bgm-toggle-btn" class="bgm-btn" onclick="toggleBGM()">🎵 BGM: OFF</button>
   </div>
 
   <!-- HPバー -->
@@ -616,6 +688,13 @@
     </div>
   </div>
 
+  <!-- ★ 権利表記 ＆ 配信・クレジット規定フッター ★ -->
+  <footer class="game-footer">
+    <div><strong>Developer / Copyright:</strong> CCネクストフィード</div>
+    <div>🎮 <strong>動画配信・実況について:</strong> YouTube・Twitch等の動画配信・実況での使用・収益化は制限なく<b>OK</b>です！</div>
+    <div>✨ 可能であれば概要欄等に本ゲームのタイトルやリンク等のクレジット記載をお願いいたします。</div>
+  </footer>
+
   <script>
     // ==========================================
     // ⚙️ SUPABASE 接続設定
@@ -628,11 +707,80 @@
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
+    // ==========================================
+    // 🖼️ 背景画像 ＆ 🎵 BGM 相対パス設定エリア
+    // （GitHubルート直下にアップロードした場合）
+    // ==========================================
+    const BG_IMAGES = {
+      normal: './bg_normal.jpg', // 通常時の背景画像
+      death: './bg_death.jpg'      // HP0（GAMEOVER）時の背景画像
+    };
+
+    const BGM_URLS = {
+      normal: './bgm_normal.mp3', // 通常時のBGM
+      riichi: './bgm_riichi.mp3'  // リーチ時のBGM
+    };
+
+    // --- 背景画像の適用 ---
+    function updateBackgroundImage(isDeath = false) {
+      if (isDeath && BG_IMAGES.death) {
+        document.body.style.backgroundImage = `url('${BG_IMAGES.death}')`;
+      } else if (!isDeath && BG_IMAGES.normal) {
+        document.body.style.backgroundImage = `url('${BG_IMAGES.normal}')`;
+      } else {
+        document.body.style.backgroundImage = 'none';
+      }
+    }
+
+    // --- BGM 管理システム ---
+    let currentBgmAudio = null;
+    let isBgmEnabled = false;
+
+    function toggleBGM() {
+      initAudio();
+      isBgmEnabled = !isBgmEnabled;
+      const btn = document.getElementById('bgm-toggle-btn');
+      if (isBgmEnabled) {
+        btn.innerText = '🎵 BGM: ON';
+        btn.classList.add('active');
+        playBGM(isRiichi ? 'riichi' : 'normal');
+      } else {
+        btn.innerText = '🎵 BGM: OFF';
+        btn.classList.remove('active');
+        stopBGM();
+      }
+    }
+
+    function playBGM(type) {
+      if (!isBgmEnabled) return;
+      const url = BGM_URLS[type];
+      if (!url) return;
+
+      if (currentBgmAudio && currentBgmAudio.src.includes(url.replace('./', ''))) {
+        return; // すでに同じ曲が再生中の場合はスキップ
+      }
+
+      stopBGM();
+
+      currentBgmAudio = new Audio(url);
+      currentBgmAudio.loop = true;
+      currentBgmAudio.volume = globalVolume;
+      currentBgmAudio.play().catch(e => console.log('BGM Play Error:', e));
+    }
+
+    function stopBGM() {
+      if (currentBgmAudio) {
+        currentBgmAudio.pause();
+        currentBgmAudio = null;
+      }
+    }
+
     // --- 音量コントロール変数 ---
     let globalVolume = 0.3;
     function updateVolume(val) {
       globalVolume = parseFloat(val);
       document.getElementById('volume-text').innerText = `${Math.round(globalVolume * 100)}%`;
+      if (currentBgmAudio) currentBgmAudio.volume = globalVolume;
     }
 
     // --- Web Audio API (SE) ---
@@ -654,6 +802,11 @@
         osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
         gain.gain.setValueAtTime(0.5 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now); osc.stop(now + 0.08);
+      } else if (type === 'flash_tick') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, now);
+        osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.06);
+        gain.gain.setValueAtTime(0.4 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+        osc.start(now); osc.stop(now + 0.06);
       } else if (type === 'damage') {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now);
         osc.frequency.linearRampToValueAtTime(40, now + 0.2);
@@ -718,6 +871,7 @@
     let lastSacrificeTurn = -5; // 前回犠牲ターン
     let isRiichi = false, isRiichiSelecting = false, isGameOver = false;
     let autoDiscardTimer = null;
+    let flashCountdownTimer = null; // フラッシュ暗算 回答5秒タイマー
     let hp = 1000;
     const MAX_HP = 1000;
 
@@ -790,7 +944,9 @@
         hp = 0;
         isGameOver = true;
         document.body.classList.add('death-mode');
+        updateBackgroundImage(true);
         playSE('death');
+        stopBGM();
         showMessage('💀 GAME OVER 💀', '精神力が尽きた...。あなたの負けです。', '');
       }
       document.getElementById('hp-text').innerText = `${hp} / ${MAX_HP}`;
@@ -799,7 +955,9 @@
 
     function initGame() {
       if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
+      if (flashCountdownTimer) clearInterval(flashCountdownTimer);
       document.body.classList.remove('death-mode');
+      updateBackgroundImage(false);
 
       deck = createDeck();
       hand = []; river = []; turn = 0; kanCount = 0; hp = MAX_HP;
@@ -813,6 +971,8 @@
       closeModal();
       clearMessages();
       updateHP(0);
+
+      playBGM('normal');
 
       for (let i = 0; i < 13; i++) hand.push(deck.pop());
       sortTiles(hand);
@@ -895,6 +1055,7 @@
         isRiichi = true;
         isRiichiSelecting = false;
         playSE('riichi');
+        playBGM('riichi'); // リーチ用BGMへ変更
         document.getElementById('riichi-badge').style.display = 'inline-block';
       }
 
@@ -1202,6 +1363,7 @@
     function cancelRiichiAndContinue() {
       if (isRiichi) {
         isRiichi = false;
+        playBGM('normal'); // 通常BGMに戻す
         document.getElementById('riichi-badge').style.display = 'none';
         showMessage('⚠️ リーチ解除', '上がれなかったためリーチを解除しました。', '');
       }
@@ -1244,7 +1406,6 @@
         let res = evaluateHand(fullTiles, isRiichi);
         let yakuStr = res.yakus.map(y => `${y.name}`).join('・');
         
-        // ★ クリア時の称賛メッセージ！
         openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！偉業を称えて名前を刻んでくれ！", "");
         showMessage(`🎉 生き残れた英雄！（打牌数:${turn}）`, yakuStr, res.scoreText);
         isGameOver = true;
@@ -1403,7 +1564,10 @@
       requestAnimationFrame(loop);
     }
 
+    // フラッシュ暗算（エフェクト・SE・5秒制限タイマー対応）
     function startFlashMathEvent(onSuccess, onFailure) {
+      if (flashCountdownTimer) clearInterval(flashCountdownTimer);
+
       openModal("⚡ フラッシュ暗算", "表示される5個の1桁の数字の合計を答えろ！", "<div id='flash-box' class='flash-num'>READY...</div>");
 
       let numbers = [];
@@ -1415,23 +1579,63 @@
         let interval = setInterval(() => {
           let box = document.getElementById('flash-box');
           if (idx < numbers.length) {
-            if (box) box.innerText = numbers[idx];
+            if (box) {
+              playSE('flash_tick');
+              box.innerText = numbers[idx];
+              box.classList.remove('pop');
+              void box.offsetWidth;
+              box.classList.add('pop');
+            }
             idx++;
           } else {
             clearInterval(interval);
-            if (box) box.innerHTML = `
-              <input type="number" id="flash-ans" class="flash-input" placeholder="合計">
-              <button onclick="checkFlashAns(${sum})" style="margin-left:5px;">回答</button>
-            `;
+            
+            // 回答フェーズ（5秒制限時間）
+            let limitTime = 5;
+            if (box) {
+              box.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                  <div id="flash-timer-display" style="font-size:14px; color:#ff7799; font-weight:bold;">回答制限時間: 5.0秒</div>
+                  <div style="display:flex; align-items:center;">
+                    <input type="number" id="flash-ans" class="flash-input" placeholder="合計" autofocus>
+                    <button onclick="checkFlashAns(${sum})" style="margin-left:5px;">回答</button>
+                  </div>
+                </div>
+              `;
+            }
+
             window.currentFlashSuccess = onSuccess;
             window.currentFlashFailure = onFailure;
+
+            let startTime = performance.now();
+            flashCountdownTimer = setInterval(() => {
+              let elapsed = (performance.now() - startTime) / 1000;
+              let remain = Math.max(0, limitTime - elapsed);
+              let timerEl = document.getElementById('flash-timer-display');
+              if (timerEl) timerEl.innerText = `回答制限時間: ${remain.toFixed(1)}秒`;
+
+              if (remain <= 0) {
+                clearInterval(flashCountdownTimer);
+                openModal("⏱️ タイムオーバー！", "5秒以内に回答できませんでした！上がれなかったためリーチを解除しました！", "");
+                removeRandomTiles(5);
+                if (window.currentFlashFailure) {
+                  window.currentFlashFailure();
+                } else {
+                  setTimeout(() => { closeModal(); render(); }, 1500);
+                }
+              }
+            }, 100);
           }
         }, 600);
       }, 1000);
     }
 
     function checkFlashAns(correctSum) {
-      let val = parseInt(document.getElementById('flash-ans').value);
+      if (flashCountdownTimer) clearInterval(flashCountdownTimer);
+
+      let inputEl = document.getElementById('flash-ans');
+      let val = inputEl ? parseInt(inputEl.value) : NaN;
+
       if (val === correctSum) {
         openModal("⭕ 正解！", "見事な計算力です！", "");
         setTimeout(() => { closeModal(); window.currentFlashSuccess(); }, 1000);
@@ -1453,6 +1657,7 @@
       document.getElementById('game-modal').style.display = 'flex';
     }
     function closeModal() {
+      if (flashCountdownTimer) clearInterval(flashCountdownTimer);
       document.getElementById('game-modal').style.display = 'none';
     }
 
