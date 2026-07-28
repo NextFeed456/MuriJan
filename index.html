@@ -12,7 +12,7 @@
       -webkit-tap-highlight-color: transparent;
     }
     
-    /* ゆるふわベースのスタイル */
+    /* ゆるふわベースのスタイル（縦スクロールを防止して画面内に収める） */
     body {
       background-color: #fff5f7;
       color: #5a4048;
@@ -20,11 +20,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
       margin: 0;
-      padding: 10px;
+      padding: 6px;
       transition: background-color 0.8s ease;
       position: relative;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
 
     /* 背景画像用オーバーレイ */
@@ -58,8 +60,8 @@
     }
 
     h1 {
-      margin: 5px 0 5px 0;
-      font-size: 24px;
+      margin: 2px 0;
+      font-size: 20px;
       text-align: center;
       color: #ff7799;
       letter-spacing: 1px;
@@ -70,25 +72,26 @@
       text-shadow: 0 0 15px #ff0000 !important;
     }
 
-    /* 折りたたみルールのスタイル */
+    /* 折りたたみルールのスタイル（高さを抑える） */
     .rules-details {
       width: 100%;
-      max-width: 800px;
-      margin-bottom: 10px;
+      max-width: 760px;
+      margin-bottom: 4px;
       background: rgba(255, 255, 255, 0.9);
       border: 2px solid #ffccd5;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(255, 182, 193, 0.3);
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(255, 182, 193, 0.3);
       overflow: hidden;
       backdrop-filter: blur(4px);
+      flex-shrink: 0;
     }
     body.death-mode .rules-details {
       background: rgba(26, 0, 0, 0.9);
       border-color: #5a0e0e;
     }
     .rules-summary {
-      padding: 8px 12px;
-      font-size: 13px;
+      padding: 4px 10px;
+      font-size: 11px;
       font-weight: bold;
       color: #ff6688;
       cursor: pointer;
@@ -103,42 +106,46 @@
       color: #ff5555;
     }
     .rules-content {
-      padding: 10px 15px;
-      font-size: 12px;
-      line-height: 1.6;
+      padding: 6px 10px;
+      font-size: 11px;
+      line-height: 1.4;
       color: #5a4048;
+      max-height: 120px;
+      overflow-y: auto;
     }
     body.death-mode .rules-content {
       color: #ffaaaa;
     }
     .rules-content ul {
-      margin: 4px 0 0 0;
-      padding-left: 20px;
+      margin: 2px 0 0 0;
+      padding-left: 15px;
     }
     .rules-content li {
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     /* 音量調整バー */
     .volume-container {
       background: rgba(255, 255, 255, 0.9);
       border: 2px solid #ffccd5;
-      border-radius: 20px;
-      padding: 4px 15px;
-      margin-bottom: 10px;
-      font-size: 12px;
+      border-radius: 15px;
+      padding: 2px 10px;
+      margin-bottom: 4px;
+      font-size: 11px;
       font-weight: bold;
       color: #ff7799;
       display: flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 2px 5px rgba(255, 182, 193, 0.4);
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(255, 182, 193, 0.4);
       flex-wrap: wrap;
       justify-content: center;
+      flex-shrink: 0;
     }
     .volume-container input {
       accent-color: #ff7799;
       cursor: pointer;
+      width: 90px;
     }
 
     /* BGM切り替えボタン */
@@ -146,11 +153,11 @@
       background: #ff7799;
       color: white;
       border: none;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
       cursor: pointer;
-      margin-left: 5px;
+      margin-left: 4px;
     }
     .bgm-btn.active {
       background: #4db6ac;
@@ -159,33 +166,34 @@
     /* HPゲージ */
     .hp-container {
       width: 100%;
-      max-width: 800px;
+      max-width: 760px;
       background: rgba(255, 255, 255, 0.9);
-      border: 3px solid #ffb6c1;
-      border-radius: 15px;
-      padding: 6px 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+      border: 2px solid #ffb6c1;
+      border-radius: 12px;
+      padding: 4px 10px;
+      margin-bottom: 4px;
+      box-shadow: 0 2px 6px rgba(255, 182, 193, 0.3);
+      flex-shrink: 0;
     }
     body.death-mode .hp-container {
       background: rgba(26, 0, 0, 0.9);
       border-color: #880000;
-      box-shadow: 0 0 15px #ff0000;
+      box-shadow: 0 0 10px #ff0000;
     }
     .hp-header {
       display: flex;
       justify-content: space-between;
       font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 4px;
+      font-size: 11px;
+      margin-bottom: 2px;
       color: #ff6688;
     }
     body.death-mode .hp-header { color: #ff4444; }
     .hp-bar-outer {
       width: 100%;
-      height: 18px;
+      height: 14px;
       background: #ffe6eb;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
     }
     body.death-mode .hp-bar-outer { background: #330000; }
@@ -193,60 +201,67 @@
       height: 100%;
       width: 100%;
       background: linear-gradient(90deg, #ff99bb, #ff5588);
-      border-radius: 10px;
+      border-radius: 8px;
       transition: width 0.3s ease;
     }
     body.death-mode .hp-bar-inner { background: #ff0000; }
     
     .game-layout {
       display: flex;
-      gap: 15px;
-      max-width: 1200px;
+      gap: 10px;
+      max-width: 1100px;
       width: 100%;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: center;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
     }
 
     .game-board {
       background-color: rgba(255, 240, 243, 0.92);
-      border: 4px solid #ffb6c1;
-      border-radius: 20px;
+      border: 3px solid #ffb6c1;
+      border-radius: 16px;
       flex: 1;
       width: 100%;
-      max-width: 800px;
-      padding: 12px;
-      box-shadow: 0 8px 15px rgba(255, 182, 193, 0.4);
-      position: relative; /* 子要素（モーダル）の基準位置 */
+      max-width: 760px;
+      padding: 8px 10px;
+      box-shadow: 0 6px 12px rgba(255, 182, 193, 0.4);
+      position: relative;
       backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     body.death-mode .game-board {
       background-color: rgba(43, 8, 8, 0.92);
       border-color: #5a0e0e;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
     }
 
     /* 折りたたみ式 ランキングボード */
     .ranking-board {
       background-color: rgba(255, 255, 255, 0.92);
-      border: 3px solid #ffccd5;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 800px;
+      border: 2px solid #ffccd5;
+      border-radius: 16px;
+      width: 260px;
       padding: 0;
-      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
+      box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
       backdrop-filter: blur(4px);
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
     }
     body.death-mode .ranking-board {
       background-color: rgba(21, 0, 0, 0.92);
       border-color: #5a0e0e;
     }
     .ranking-summary {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: bold;
       color: #ff6688;
       text-align: center;
-      padding: 10px 15px;
+      padding: 8px 10px;
       cursor: pointer;
       user-select: none;
       background: #ffe6ec;
@@ -260,87 +275,89 @@
       color: #ff5555;
     }
     .ranking-content {
-      padding: 12px;
-      max-height: 400px;
+      padding: 8px;
       overflow-y: auto;
+      flex: 1;
     }
     .ranking-list { list-style: none; padding: 0; margin: 0; }
     .ranking-item {
       background: #fff5f7;
-      margin-bottom: 6px;
-      padding: 6px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      border-left: 4px solid #ff88aa;
+      margin-bottom: 4px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      border-left: 3px solid #ff88aa;
     }
     body.death-mode .ranking-item {
       background: rgba(0,0,0,0.6);
       border-left-color: #ff0000;
     }
     .ranking-item .rank-head { font-weight: bold; color: #ff5577; display: flex; justify-content: space-between; }
-    .ranking-item .rank-player { color: #5a4048; font-size: 11px; margin-top: 2px; }
+    .ranking-item .rank-player { color: #5a4048; font-size: 10px; margin-top: 1px; }
     body.death-mode .ranking-item .rank-player { color: #ffffff; }
-    .ranking-item .rank-detail { font-size: 10px; color: #886670; margin-top: 2px; }
+    .ranking-item .rank-detail { font-size: 9px; color: #886670; margin-top: 1px; }
 
     .info-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #ffffff;
-      padding: 8px 12px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      font-size: 11px;
       font-weight: bold;
       color: #775560;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 4px;
     }
     body.death-mode .info-bar { background: rgba(0,0,0,0.5); color: #ffaaaa; }
 
-    .dora-area { display: flex; align-items: center; gap: 4px; }
+    .dora-area { display: flex; align-items: center; gap: 3px; }
 
     .tenpai-info-bar {
       background: #ffe6ec;
       border: 1px solid #ffb6c1;
-      padding: 6px 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 11px;
       color: #ff5577;
       display: flex;
       align-items: center;
       gap: 6px;
-      min-height: 38px;
+      min-height: 28px;
     }
     body.death-mode .tenpai-info-bar { background: rgba(255,0,0,0.2); border-color: #ff3333; color: #ff9999; }
 
     .status-badge {
       background-color: #ff6688;
       color: white;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-size: 10px;
       display: none;
     }
     .river-section {
-      min-height: 90px;
+      min-height: 70px;
+      max-height: 80px;
+      overflow-y: auto;
       background: #ffffff;
-      border-radius: 12px;
-      padding: 8px;
-      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 6px;
+      margin-bottom: 4px;
       border: 2px dashed #ffccd5;
     }
     body.death-mode .river-section { background: rgba(0,0,0,0.4); border-color: #880000; }
-    .river-title { font-size: 11px; color: #ff7799; margin-bottom: 4px; font-weight: bold; }
-    .tile-container { display: flex; flex-wrap: wrap; gap: 3px; }
+    .river-title { font-size: 10px; color: #ff7799; margin-bottom: 2px; font-weight: bold; }
+    .tile-container { display: flex; flex-wrap: wrap; gap: 2px; }
     
     .hand-section {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      margin-top: 10px;
+      margin-top: 4px;
       touch-action: manipulation;
     }
     .hand-tiles-area {
@@ -348,19 +365,20 @@
       flex-wrap: nowrap;
       gap: 2px;
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding-bottom: 2px;
     }
 
+    /* 💡 操作キーや牌を少し小さくして画面内に収める調整 */
     .tile {
-      width: calc((100vw - 70px) / 14);
-      max-width: 40px;
-      min-width: 22px;
-      height: 52px;
+      width: calc((100vw - 60px) / 14);
+      max-width: 34px;
+      min-width: 20px;
+      height: 44px;
       background: #ffffff;
       color: #443338;
-      border-radius: 6px;
-      border-bottom: 3px solid #e6ccd3;
-      box-shadow: 0 2px 4px rgba(255, 182, 193, 0.4);
+      border-radius: 5px;
+      border-bottom: 2px solid #e6ccd3;
+      box-shadow: 0 1px 3px rgba(255, 182, 193, 0.4);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -372,14 +390,14 @@
       flex-shrink: 0;
       transition: transform 0.1s, opacity 0.3s, border-color 0.3s;
     }
-    .tile:active { transform: translateY(-3px); background-color: #fff0f3; }
+    .tile:active { transform: translateY(-2px); background-color: #fff0f3; }
     .tile.riichi-target {
       border: 2px solid #ff4477;
       animation: pulse 1s infinite;
     }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0.7); }
-      70% { box-shadow: 0 0 0 8px rgba(255, 68, 119, 0); }
+      70% { box-shadow: 0 0 0 6px rgba(255, 68, 119, 0); }
       100% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0); }
     }
 
@@ -391,8 +409,8 @@
     }
     @keyframes popDestroyAnim {
       0% { transform: scale(1) translateY(0); filter: brightness(1); opacity: 1; }
-      30% { transform: scale(1.25) translateY(-10px); filter: brightness(1.6); background-color: #ff3366; color: #fff; box-shadow: 0 0 15px #ff0055; }
-      100% { transform: scale(0.2) translateY(-60px) rotate(25deg); opacity: 0; filter: brightness(2); }
+      30% { transform: scale(1.25) translateY(-8px); filter: brightness(1.6); background-color: #ff3366; color: #fff; box-shadow: 0 0 12px #ff0055; }
+      100% { transform: scale(0.2) translateY(-50px) rotate(25deg); opacity: 0; filter: brightness(2); }
     }
 
     /* 上からスッと落ちてフェードインで入る演出 */
@@ -400,93 +418,94 @@
       animation: slideInAnim 0.55s ease-out forwards;
     }
     @keyframes slideInAnim {
-      0% { transform: translateY(-35px) scale(0.85); opacity: 0; }
-      70% { transform: translateY(4px) scale(1.03); opacity: 0.9; }
+      0% { transform: translateY(-25px) scale(0.85); opacity: 0; }
+      70% { transform: translateY(3px) scale(1.03); opacity: 0.9; }
       100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     /* 新しく補充された牌の枠線ハイライト */
     .tile.new-drawn {
       border: 2px solid #00bfa5 !important;
-      box-shadow: 0 0 10px rgba(0, 191, 165, 0.6) !important;
+      box-shadow: 0 0 8px rgba(0, 191, 165, 0.6) !important;
     }
 
     .tile.red { color: #e04466; }
     .tile.green { color: #27ae60; }
     .tile.black { color: #443338; }
     .tile.aka-dora { background-color: #ffe6ec; }
-    .tile-num { font-size: 15px; line-height: 1; }
-    .tile-type { font-size: 9px; margin-top: 1px; }
+    .tile-num { font-size: 13px; line-height: 1; }
+    .tile-type { font-size: 8px; margin-top: 1px; }
 
     .tile.small {
-      width: 24px;
-      height: 34px;
+      width: 20px;
+      height: 28px;
       border-bottom: 2px solid #e6ccd3;
     }
-    .tile.small .tile-num { font-size: 11px; }
-    .tile.small .tile-type { font-size: 8px; }
+    .tile.small .tile-num { font-size: 10px; }
+    .tile.small .tile-type { font-size: 7px; }
 
     .drawn-tile-area {
       border-left: 2px dashed #ffb6c1;
-      padding-left: 6px;
+      padding-left: 4px;
       flex-shrink: 0;
     }
 
     .controls {
-      margin-top: 15px;
+      margin-top: 4px;
       display: flex;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
     }
+    /* 💡 ボタンを少し小さくして画面内に確実に収める */
     button {
       background-color: #ff88aa;
       border: none;
       color: white;
-      padding: 8px 14px;
-      font-size: 13px;
+      padding: 5px 10px;
+      font-size: 11px;
       font-weight: bold;
-      border-radius: 15px;
+      border-radius: 10px;
       cursor: pointer;
-      box-shadow: 0 3px 0 #e06688;
+      box-shadow: 0 2px 0 #e06688;
       touch-action: manipulation;
     }
-    button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e06688; }
-    button:disabled { background-color: #ddccdd; box-shadow: 0 3px 0 #bbaa33; cursor: not-allowed; opacity: 0.6; }
-    button.btn-riichi { background-color: #ff5577; box-shadow: 0 3px 0 #cc3355; }
-    button.btn-kan { background-color: #ba68c8; box-shadow: 0 3px 0 #8e24aa; }
-    button.btn-sacrifice { background-color: #4db6ac; box-shadow: 0 3px 0 #00897b; }
-    button.btn-kyushu { background-color: #ff9800; box-shadow: 0 3px 0 #f57c00; }
-    button.btn-cancel { background-color: #b0bec5; box-shadow: 0 3px 0 #78909c; margin-top: 8px; }
+    button:active { transform: translateY(2px); box-shadow: 0 0 0 #e06688; }
+    button:disabled { background-color: #ddccdd; box-shadow: 0 2px 0 #bbaa33; cursor: not-allowed; opacity: 0.6; }
+    button.btn-riichi { background-color: #ff5577; box-shadow: 0 2px 0 #cc3355; }
+    button.btn-kan { background-color: #ba68c8; box-shadow: 0 2px 0 #8e24aa; }
+    button.btn-sacrifice { background-color: #4db6ac; box-shadow: 0 2px 0 #00897b; }
+    button.btn-kyushu { background-color: #ff9800; box-shadow: 0 2px 0 #f57c00; }
+    button.btn-cancel { background-color: #b0bec5; box-shadow: 0 2px 0 #78909c; margin-top: 4px; }
 
     button.btn-win-glow {
       background-color: #ff4081 !important;
-      box-shadow: 0 3px 0 #c2185b !important;
+      box-shadow: 0 2px 0 #c2185b !important;
       animation: winGlow 0.8s infinite alternate;
     }
     @keyframes winGlow {
-      0% { transform: scale(1); box-shadow: 0 0 5px #ff4081; }
-      100% { transform: scale(1.05); box-shadow: 0 0 15px #ffd54f; }
+      0% { transform: scale(1); box-shadow: 0 0 4px #ff4081; }
+      100% { transform: scale(1.05); box-shadow: 0 0 10px #ffd54f; }
     }
 
     .result-box {
-      margin-top: 12px;
+      margin-top: 4px;
       background: #ffffff;
-      border-radius: 12px;
-      padding: 8px;
+      border-radius: 10px;
+      padding: 4px 8px;
       text-align: center;
-      min-height: 40px;
+      min-height: 32px;
       border: 2px solid #ffccd5;
     }
     body.death-mode .result-box { background: rgba(0,0,0,0.8); border-color: #880000; }
-    .result-title { font-size: 18px; font-weight: bold; color: #ff5577; }
-    body.death-mode .result-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
-    .yaku-list { margin: 4px 0; font-size: 12px; color: #665560; }
+    .result-title { font-size: 14px; font-weight: bold; color: #ff5577; }
+    body.death-mode .result-title { color: #ff0000; text-shadow: 0 0 8px #ff0000; }
+    .yaku-list { margin: 2px 0; font-size: 11px; color: #665560; }
     body.death-mode .yaku-list { color: #ffaaaa; }
-    .score-detail { font-size: 14px; color: #009688; font-weight: bold; }
-    .error-msg { font-size: 12px; color: #e53935; margin-top: 4px; }
+    .score-detail { font-size: 12px; color: #009688; font-weight: bold; }
+    .error-msg { font-size: 10px; color: #e53935; margin-top: 2px; }
 
-    /* 💡 麻雀操作画面（ゲームボード）内部にだけ収まるモーダル設定 */
+    /* 麻雀操作画面内部にだけ収まるモーダル設定 */
     .modal-overlay {
       position: absolute !important;
       top: 0 !important;
@@ -499,43 +518,43 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       z-index: 100 !important;
-      padding: 15px;
+      padding: 10px;
       text-align: center;
       overflow-y: auto;
     }
     body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.94); }
     .modal-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: #ffffff;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px #ff7799;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 8px #ff7799;
     }
-    body.death-mode .modal-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    body.death-mode .modal-title { color: #ff0000; text-shadow: 0 0 8px #ff0000; }
     .modal-desc {
-      font-size: 12px;
+      font-size: 11px;
       color: #ffe6ec;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
     body.death-mode .modal-desc { color: #cccccc; }
 
     #dodge-canvas {
       background: #11080c;
-      border: 3px solid #ff88aa;
-      border-radius: 10px;
+      border: 2px solid #ff88aa;
+      border-radius: 8px;
       max-width: 100%;
-      box-shadow: 0 0 15px rgba(255, 136, 170, 0.3);
+      box-shadow: 0 0 10px rgba(255, 136, 170, 0.3);
     }
 
     /* スマホ用 十字キーUIスタイル */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 42px);
-      grid-template-rows: repeat(2, 42px);
-      gap: 4px;
-      margin-top: 6px;
+      grid-template-columns: repeat(3, 36px);
+      grid-template-rows: repeat(2, 36px);
+      gap: 3px;
+      margin-top: 4px;
       justify-content: center;
       user-select: none;
     }
@@ -543,9 +562,9 @@
       background: #ffb6c1;
       border: 1px solid #ff88aa;
       color: #ffffff;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -559,17 +578,17 @@
       box-shadow: none;
     }
 
-    .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; }
-    .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 8px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .quiz-options { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 260px; }
+    .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 6px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 11px; }
     .quiz-btn:hover { background: #ffe6ec; }
     
     /* フラッシュ暗算 数字アニメーション演出 */
     .flash-num {
-      font-size: 52px;
+      font-size: 44px;
       font-weight: bold;
       color: #ffffff;
-      text-shadow: 0 0 15px #ff7799;
-      height: 70px;
+      text-shadow: 0 0 12px #ff7799;
+      height: 60px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -583,53 +602,29 @@
       100% { transform: scale(1); }
     }
 
-    .flash-input { font-size: 18px; padding: 4px; width: 110px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
+    .flash-input { font-size: 16px; padding: 3px; width: 100px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 6px; color: #55444a; }
 
-    .coin-img { font-size: 44px; transition: transform 0.5s; }
+    .coin-img { font-size: 38px; transition: transform 0.5s; }
 
     .mentsu-option-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       background: #ffffff;
       border: 2px solid #ff88aa;
-      padding: 6px 10px;
-      border-radius: 12px;
+      padding: 4px 8px;
+      border-radius: 10px;
       cursor: pointer;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       width: 100%;
-      max-width: 320px;
+      max-width: 300px;
     }
     .mentsu-option-btn:hover { background: #ffe6ec; }
 
-    /* 権利表記＆フッター領域 */
+    /* 権利表記＆フッター領域（高さを抑えて非表示・隠すかシンプルに） */
     .game-footer {
-      margin-top: 25px;
-      margin-bottom: 15px;
-      padding: 12px 20px;
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid #ffccd5;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 11px;
-      color: #775560;
-      line-height: 1.6;
-      max-width: 800px;
-      width: 100%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      backdrop-filter: blur(4px);
-    }
-    body.death-mode .game-footer {
-      background: rgba(20, 0, 0, 0.85);
-      border-color: #5a0e0e;
-      color: #ff8888;
-    }
-    .game-footer strong {
-      color: #ff5577;
-    }
-    body.death-mode .game-footer strong {
-      color: #ff3333;
+      display: none; /* 画面内に収めるため非表示にしてすっきりさせる */
     }
   </style>
 </head>
@@ -648,12 +643,12 @@
         <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
         <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
         <li><b>ドラDiscardのペナルティ</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
-        <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
-        <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
-        <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
+        <li><b>面子犠牲 (HP回復)</b>: 手牌の順子や刻子を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。</li>
+        <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。河へ移動。</li>
+        <li><b>山札リセット</b>: 山札が0になると捨て牌が全て戻ってシャッフルし、<b>HP500回復</b>！</li>
         <li><b>九種九牌</b>: 一九字牌が9種以上あればボタン出現。全牌を山札に戻して引き直し。</li>
-        <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
-        <li><b>アガリの試練</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>リーチ中に失敗するとリーチが解除</b>されます。</li>
+        <li><b>リーチ選択</b>: コイントス または「丁・半」の2択から選択可能！（丁・半は2回まで挑戦）</li>
+        <li><b>10打牌ごとのハプニング</b>: ミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
       </ul>
     </div>
   </details>
@@ -724,7 +719,7 @@
         <button onclick="initGame()">最初から</button>
       </div>
 
-      <!-- 💡 麻雀操作画面（ゲームボード）内部にだけ表示されるミニゲーム画面 -->
+      <!-- 麻雀操作画面内部にだけ収まるモーダル設定 -->
       <div id="game-modal" class="modal-overlay" style="display:none;">
         <div class="modal-title" id="modal-title">イベント発生</div>
         <div class="modal-desc" id="modal-desc">説明文</div>
@@ -736,25 +731,18 @@
     <details class="ranking-board">
       <summary class="ranking-summary">
         <span>✨ 絶望を生き延びた者達一覧</span>
-        <span style="font-size:11px; font-weight:normal;">（タップで開閉）</span>
+        <span style="font-size:10px; font-weight:normal;">（タップで開閉）</span>
       </summary>
       <div class="ranking-content">
         <ol class="ranking-list" id="ranking-list">
           <li class="ranking-item" style="text-align:center;">読み込み中...</li>
         </ol>
-        <div style="text-align: center; margin-top: 10px;">
-          <button onclick="fetchGlobalRanking()" style="padding: 4px 10px; font-size: 11px;">更新</button>
+        <div style="text-align: center; margin-top: 6px;">
+          <button onclick="fetchGlobalRanking()" style="padding: 3px 8px; font-size: 10px;">更新</button>
         </div>
       </div>
     </details>
   </div>
-
-  <!-- フッター -->
-  <footer class="game-footer">
-    <div><strong>Developer / Copyright:</strong> NextFeed</div>
-    <div>🎮 <strong>動画配信・実況について:</strong> YouTube・Twitch等の動画配信・実況での使用・収益化は制限なく<b>OK</b>です！</div>
-    <div>✨ 可能であれば概要欄等に本ゲームのタイトルやリンク等のクレジット記載をお願いいたします。</div>
-  </footer>
 
   <script>
     // ==========================================
@@ -865,11 +853,16 @@
         osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
         gain.gain.setValueAtTime(0.5 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now); osc.stop(now + 0.08);
-      } else if (type === 'flash_tick') {
+      } else if (type === 'flash_tick' || type === 'count_tick') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, now);
         osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.06);
         gain.gain.setValueAtTime(0.4 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
         osc.start(now); osc.stop(now + 0.06);
+      } else if (type === 'count_zero') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15);
+        gain.gain.setValueAtTime(0.5 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now); osc.stop(now + 0.15);
       } else if (type === 'damage') {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now);
         osc.frequency.linearRampToValueAtTime(40, now + 0.2);
@@ -944,20 +937,23 @@
       { q: "麻雀の「ローカル役」で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
       { q: "光の速度はどっちが近い？", a: "秒速30万km", b: "秒速300万km", ans: "a" },
       { q: "日本で一番広い都道府県は？", a: "北海道", b: "岩手県", ans: "a" },
-      { q: "広辞苑で最初に出てくる言葉は？", a: "アーア", b: "アイ", ans: "a" },
       { q: "将棋の盤面はマス目がいくつ？", a: "81マス", b: "64マス", ans: "a" },
-      { q: "元素記号「Fe」は何の金属？", a: "鉄", b: "フッ素", ans: "a" },
-      { q: "1ヤードは何センチメートル？", a: "約91.4cm", b: "約81.4cm", ans: "a" },
       { q: "富士山の標高は？", a: "3776m", b: "3876m", ans: "a" },
-      { q: "ダチョウの目は脳より大きい？", a: "大きい", b: "小さい", ans: "a" },
-      { q: "イチゴのつぶつぶは種である？", a: "果実である", b: "種である", ans: "a" },
-      { q: "人体で一番硬い部分は？", a: "エナメル質", b: "大腿骨", ans: "a" },
       { q: "エベレストの標高は？", a: "8848m", b: "8888m", ans: "a" },
-      { q: "1ポンドは約何グラム？", a: "約453g", b: "約353g", ans: "a" },
-      { q: "タコの心臓の数は？", a: "3つ", b: "1つ", ans: "a" },
-      { q: "キリンの首の骨の数は？", a: "7個", b: "12個", ans: "a" }
+      { q: "世界で一番面積が大きい国は？", a: "ロシア", b: "カナダ", ans: "a" },
+      { q: "オーストラリアの首都は？", a: "キャンベラ", b: "シドニー", ans: "a" },
+      { q: "ブラジルの公用語は？", a: "ポルトガル語", b: "スペイン語", ans: "a" },
+      { q: "エジプトの首都は？", a: "カイロ", b: "アレクサンドリア", ans: "a" },
+      { q: "世界で一番長い川は？", a: "ナイル川", b: "アマゾン川", ans: "a" },
+      { q: "イタリアの首都は？", a: "ローマ", b: "ミラノ", ans: "a" },
+      { q: "元素記号「Fe」は何の金属？", a: "鉄", b: "フッ素", ans: "a" },
+      { q: "太陽系の惑星で最大のものは？", a: "木星", b: "土星", ans: "a" },
+      { q: "ヒトの体で最も重い臓器は？", a: "肝臓", b: "皮膚", ans: "a" },
+      { q: "水の化学式はどれ？", a: "H2O", b: "CO2", ans: "a" },
+      { q: "光合成で植物が吸収する気体は？", a: "二酸化炭素", b: "酸素", ans: "a" },
+      { q: "ペンギンは空を飛べる？", a: "飛べない", b: "飛べる", ans: "a" }
     ];
-    for(let i=QUIZ_DB.length; i<100; i++) {
+    for(let i=0; i<40; i++) {
       let n1 = Math.floor(Math.random()*89)+10;
       let n2 = Math.floor(Math.random()*89)+10;
       QUIZ_DB.push({
@@ -1148,38 +1144,41 @@
     }
 
     function removeRandomTiles(num, callback) {
-      playSE('destroy');
-      let targetTileIds = [];
-      let newAddedTileIds = [];
-
-      for (let i = 0; i < num; i++) {
-        if (drawnTile && Math.random() < 0.2) {
-          targetTileIds.push(drawnTile.id);
-          let newTile = deck.pop();
-          drawnTile = newTile;
-          if (newTile) newAddedTileIds.push(newTile.id);
-        } else if (hand.length > 0) {
-          let idx = Math.floor(Math.random() * hand.length);
-          targetTileIds.push(hand[idx].id);
-          let newTile = deck.pop();
-          hand[idx] = newTile;
-          if (newTile) newAddedTileIds.push(newTile.id);
-        }
-      }
-
-      let allTileElements = document.querySelectorAll('.tile');
-      allTileElements.forEach(el => {
-        let tileId = parseInt(el.dataset.id);
-        if (targetTileIds.includes(tileId)) {
-          el.classList.add('destroying');
-        }
-      });
-
+      closeModal();
       setTimeout(() => {
-        sortTiles(hand);
-        render(newAddedTileIds, []);
-        if (callback) callback();
-      }, 700);
+        playSE('destroy');
+        let targetTileIds = [];
+        let newAddedTileIds = [];
+
+        for (let i = 0; i < num; i++) {
+          if (drawnTile && Math.random() < 0.2) {
+            targetTileIds.push(drawnTile.id);
+            let newTile = deck.pop();
+            drawnTile = newTile;
+            if (newTile) newAddedTileIds.push(newTile.id);
+          } else if (hand.length > 0) {
+            let idx = Math.floor(Math.random() * hand.length);
+            targetTileIds.push(hand[idx].id);
+            let newTile = deck.pop();
+            hand[idx] = newTile;
+            if (newTile) newAddedTileIds.push(newTile.id);
+          }
+        }
+
+        let allTileElements = document.querySelectorAll('.tile');
+        allTileElements.forEach(el => {
+          let tileId = parseInt(el.dataset.id);
+          if (targetTileIds.includes(tileId)) {
+            el.classList.add('destroying');
+          }
+        });
+
+        setTimeout(() => {
+          sortTiles(hand);
+          render(newAddedTileIds, []);
+          if (callback) callback();
+        }, 750);
+      }, 100);
     }
 
     function countYaochuTypes(tiles) {
@@ -1254,18 +1253,18 @@
       let mentsuList = findAvailableMentsu(fullTiles);
       if (mentsuList.length === 0) return;
 
-      let html = '<div style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">';
+      let html = '<div style="display:flex; flex-direction:column; gap:6px; width:100%; align-items:center;">';
       mentsuList.forEach((m, idx) => {
         let hasDora = m.tiles.some(t => isTileDora(t));
         let healAmt = hasDora ? 400 : 200;
         html += `<div class="mentsu-option-btn" onclick="execSacrificeMentsuByIndex(${idx});">`;
-        html += '<div style="display:flex; gap:3px;">';
+        html += '<div style="display:flex; gap:2px;">';
         m.tiles.forEach(t => {
           let el = createTileElement(t, null, true);
           html += el.outerHTML;
         });
         html += '</div>';
-        html += `<span style="color:${hasDora ? '#ff9800' : '#4db6ac'}; font-weight:bold; font-size:13px;">を捧げる (+${healAmt})</span></div>`;
+        html += `<span style="color:${hasDora ? '#ff9800' : '#4db6ac'}; font-weight:bold; font-size:11px;">を捧げる (+${healAmt})</span></div>`;
       });
       html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
@@ -1288,51 +1287,54 @@
       let hasDora = mentsuObj.tiles.some(t => isTileDora(t));
       let healAmount = hasDora ? 400 : 200;
 
-      playSE('destroy');
+      closeModal();
       lastSacrificeTurn = turn;
 
-      let destroyIds = mentsuObj.tiles.map(t => t.id);
-
-      let allTileEls = document.querySelectorAll('.tile');
-      allTileEls.forEach(el => {
-        let id = parseInt(el.dataset.id);
-        if (destroyIds.includes(id)) {
-          el.classList.add('destroying');
-        }
-      });
-
       setTimeout(() => {
-        mentsuObj.tiles.forEach(target => {
-          if (drawnTile && drawnTile.id === target.id) {
-            drawnTile = null;
-          } else {
-            let idx = hand.findIndex(t => t.id === target.id);
-            if (idx !== -1) hand.splice(idx, 1);
+        playSE('destroy');
+        let destroyIds = mentsuObj.tiles.map(t => t.id);
+
+        let allTileEls = document.querySelectorAll('.tile');
+        allTileEls.forEach(el => {
+          let id = parseInt(el.dataset.id);
+          if (destroyIds.includes(id)) {
+            el.classList.add('destroying');
           }
         });
 
-        updateHP(healAmount);
+        setTimeout(() => {
+          mentsuObj.tiles.forEach(target => {
+            if (drawnTile && drawnTile.id === target.id) {
+              drawnTile = null;
+            } else {
+              let idx = hand.findIndex(t => t.id === target.id);
+              if (idx !== -1) hand.splice(idx, 1);
+            }
+          });
 
-        let newAddedTileIds = [];
-        playSE('heal');
-        for(let i = 0; i < 3; i++) {
-          if (deck.length > 0) {
-            let t = deck.pop();
-            hand.push(t);
-            newAddedTileIds.push(t.id);
+          updateHP(healAmount);
+
+          let newAddedTileIds = [];
+          playSE('heal');
+          for(let i = 0; i < 3; i++) {
+            if (deck.length > 0) {
+              let t = deck.pop();
+              hand.push(t);
+              newAddedTileIds.push(t.id);
+            }
           }
-        }
-        sortTiles(hand);
-        
-        if (!drawnTile && deck.length > 0) {
-          drawnTile = deck.pop();
-          if (drawnTile) newAddedTileIds.push(drawnTile.id);
-        }
+          sortTiles(hand);
+          
+          if (!drawnTile && deck.length > 0) {
+            drawnTile = deck.pop();
+            if (drawnTile) newAddedTileIds.push(drawnTile.id);
+          }
 
-        render(newAddedTileIds, []);
-        openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！（除外）`, "");
-        setTimeout(() => closeModal(), 1400);
-      }, 700);
+          render(newAddedTileIds, []);
+          openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！（除外）`, "");
+          setTimeout(() => closeModal(), 1400);
+        }, 700);
+      }, 100);
     }
 
     function onClickKanButton() {
@@ -1353,7 +1355,7 @@
     }
 
     function showKanModal(kanKeys) {
-      let html = '<div style="display:flex; gap:10px; flex-direction:column; align-items:center;">';
+      let html = '<div style="display:flex; gap:8px; flex-direction:column; align-items:center;">';
       kanKeys.forEach(key => {
         let [type, valStr] = key.split('_');
         html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
@@ -1423,19 +1425,31 @@
       }
     }
 
+    // --- 💡 リーチ選択システム（コイントス or 丁半 2回まで） ---
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
-      openModal("リーチさせると思ったか？", "コイントスで3回連続【表】を出せばリーチ許可！失敗で牌が3つ消滅！", `
-        <div id='coin-area'>
-          <div class='coin-img'>🪙</div>
-          <button onclick='execCoinToss()' style='margin-top:10px;'>コインを投げる</button>
-          <div><button class="btn-cancel" onclick="closeModal()">キャンセル</button></div>
+      openModal("リーチ試練の選択", "どちらの試練でリーチを賭けますか？", `
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:260px; align-items:center;">
+          <button onclick="startCoinTossGame()" style="width:100%;">🪙 コイントス (3回連続表)</button>
+          <button onclick="startChohanGame()" style="width:100%;">🎲 丁と半 (2回勝負)</button>
+          <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
         </div>
       `);
     }
 
     let coinSuccessCount = 0;
+    function startCoinTossGame() {
+      coinSuccessCount = 0;
+      openModal("🪙 コイントス試練", "3回連続【表】を出せば成功！失敗で牌が3つ消滅！", `
+        <div id='coin-area'>
+          <div class='coin-img'>🪙</div>
+          <button onclick='execCoinToss()' style='margin-top:8px;'>コインを投げる</button>
+          <div><button class="btn-cancel" onclick="startRiichiSelect()">戻る</button></div>
+        </div>
+      `);
+    }
+
     function execCoinToss() {
       let coinArea = document.getElementById('coin-area');
       let win = Math.random() < 0.5;
@@ -1456,6 +1470,50 @@
       } else {
         coinSuccessCount = 0;
         coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e53935;'>失敗！ 牌が3つ暴発しました！</p>`;
+        removeRandomTiles(3, () => {
+          setTimeout(() => { closeModal(); }, 800);
+        });
+      }
+    }
+
+    let chohanTryCount = 0;
+    function startChohanGame() {
+      chohanTryCount = 0;
+      showChohanPrompt();
+    }
+
+    function showChohanPrompt() {
+      openModal("🎲 丁と半 試練", `残り挑戦回数: ${2 - chohanTryCount}回<br>壺の中は「丁（偶数）」か「半（奇数）」か？`, `
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:8px;">
+          <button onclick="execChohan('cho')" style="background:#e53935;">🔴 丁 (偶数)</button>
+          <button onclick="execChohan('han')" style="background:#1e88e5;">🔵 半 (奇数)</button>
+        </div>
+        <div style="margin-top:8px;"><button class="btn-cancel" onclick="startRiichiSelect()">戻る</button></div>
+      `);
+    }
+
+    function execChohan(playerChoice) {
+      let diceSum = Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+      let actual = (diceSum % 2 === 0) ? 'cho' : 'han';
+
+      if (playerChoice === actual) {
+        chohanTryCount++;
+        if (chohanTryCount >= 2) {
+          openModal("✨ 丁と半 クリア！", `出目は ${diceSum}（${actual === 'cho' ? '丁' : '半'}）！2回連続的中しました！`, "");
+          setTimeout(() => {
+            closeModal();
+            isRiichiSelecting = true;
+            showMessage('立直準備', 'リーチで切る牌を選択してください。', '');
+            render();
+          }, 1200);
+        } else {
+          openModal("⭕ 的中！", `出目は ${diceSum} でした！あと1回当てればクリア！`, `
+            <button onclick="showChohanPrompt()" style="margin-top:8px;">次の勝負へ</button>
+          `);
+        }
+      } else {
+        chohanTryCount = 0;
+        openModal("❌ 外れ！", `出目は ${diceSum}（${actual === 'cho' ? '丁' : '半'}）でした！牌が3つ暴発します！`, "");
         removeRandomTiles(3, () => {
           setTimeout(() => { closeModal(); }, 800);
         });
@@ -1508,7 +1566,7 @@
         let res = evaluateHand(fullTiles, isRiichi);
         let yakuStr = res.yakus.map(y => `${y.name}`).join('・');
         
-        openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！偉業を称えて名前を刻んでくれ！", "");
+        openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！歴史に名を刻んでくれ！", "");
         showMessage(`🎉 生き残れた英雄！（打牌数:${turn}）`, yakuStr, res.scoreText);
         isGameOver = true;
         render();
@@ -1555,9 +1613,9 @@
     }
 
     function startDodgeGame(onSuccess, onFailure) {
-      openModal("⚡ 回避ゲーム！", "5秒後に開始！【矢印キー】または下部の【ボタン】で動かして避けろ！", `
-        <div id="dodge-timer" style="font-size:20px; color:#ffffff; font-weight:bold; margin-bottom:4px; text-shadow:0 0 8px #ff5577;">5</div>
-        <canvas id="dodge-canvas" width="300" height="180"></canvas>
+      openModal("⚡ 回避ゲーム！", "5秒後にカウントダウン！【矢印キー】または下部の【ボタン】で動かして避けろ！", `
+        <div id="dodge-timer" style="font-size:22px; color:#ffffff; font-weight:bold; margin-bottom:2px; text-shadow:0 0 8px #ff5577;">5</div>
+        <canvas id="dodge-canvas" width="280" height="150"></canvas>
         <div class="dpad-container">
           <div></div>
           <div class="dpad-btn" onmousedown="setTouchKey('ArrowUp', true)" onmouseup="setTouchKey('ArrowUp', false)" ontouchstart="setTouchKey('ArrowUp', true); event.preventDefault();" ontouchend="setTouchKey('ArrowUp', false)">▲</div>
@@ -1569,10 +1627,19 @@
       `);
 
       let count = 5;
+      playSE('count_tick');
+
       let timer = setInterval(() => {
         count--;
         let el = document.getElementById('dodge-timer');
         if (el) el.innerText = count;
+
+        if (count > 0) {
+          playSE('count_tick');
+        } else if (count === 0) {
+          playSE('count_zero');
+        }
+
         if (count <= 0) {
           clearInterval(timer);
           runDodgeEngine(onSuccess, onFailure);
@@ -1585,7 +1652,7 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      let px = 140, py = 80, pSize = 14;
+      let px = 130, py = 65, pSize = 12;
       let bullets = [];
       let duration = 10.0;
       let gameActive = true;
@@ -1594,7 +1661,7 @@
       window.addEventListener('keydown', keyHandler);
       window.addEventListener('keyup', keyHandler);
 
-      for(let i = 0; i < 15; i++) {
+      for(let i = 0; i < 14; i++) {
         bullets.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -1633,10 +1700,10 @@
           if (b.y < 0 || b.y > canvas.height) b.vy *= -1;
 
           ctx.beginPath();
-          ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+          ctx.arc(b.x, b.y, 3.5, 0, Math.PI * 2);
           ctx.fill();
 
-          if (px < b.x + 4 && px + pSize > b.x - 4 && py < b.y + 4 && py + pSize > b.y - 4) {
+          if (px < b.x + 3.5 && px + pSize > b.x - 3.5 && py < b.y + 3.5 && py + pSize > b.y - 3.5) {
             gameActive = false;
             window.removeEventListener('keydown', keyHandler);
             window.removeEventListener('keyup', keyHandler);
@@ -1696,8 +1763,8 @@
             let limitTime = 5;
             if (box) {
               box.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
-                  <div id="flash-timer-display" style="font-size:13px; color:#ff7799; font-weight:bold;">回答制限時間: 5.0秒</div>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                  <div id="flash-timer-display" style="font-size:12px; color:#ff7799; font-weight:bold;">回答制限時間: 5.0秒</div>
                   <div style="display:flex; align-items:center;">
                     <input type="number" id="flash-ans" class="flash-input" placeholder="合計" autofocus>
                     <button onclick="checkFlashAns(${sum})" style="margin-left:4px;">回答</button>
@@ -2136,7 +2203,7 @@
       if (tile.type === 'z') {
         displayText = HONORS[tile.val - 1];
         if (tile.val === 6) colorClass = 'green';
-        else if (tile.val === 7) colorClass, colorClass = 'red';
+        else if (tile.val === 7) colorClass = 'red';
       } else {
         displayText = tile.val;
         typeText = SUITS[tile.type];
