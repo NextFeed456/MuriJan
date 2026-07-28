@@ -10,24 +10,21 @@
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      margin: 0;
-      padding: 0;
     }
     
-    /* 💡 スマホの画面内に完全に収めるためのレイアウト設計 */
-    html, body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
+    /* 最初の時のゆるふわベースのスタイルに戻しました */
+    body {
       background-color: #fff5f7;
       color: #5a4048;
       font-family: 'Hiragino Sans', 'ヒラギノ角ゴ ProN', 'Meiryo', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 4px;
+      margin: 0;
+      padding: 10px;
+      transition: background-color 0.8s ease;
       position: relative;
+      min-height: 100vh;
     }
 
     /* 背景画像用オーバーレイ */
@@ -61,263 +58,309 @@
     }
 
     h1 {
-      font-size: 16px;
+      margin: 5px 0 5px 0;
+      font-size: 24px;
       text-align: center;
       color: #ff7799;
       letter-spacing: 1px;
-      text-shadow: 1px 1px 0px #ffe0e8;
-      margin-bottom: 2px;
-      flex-shrink: 0;
+      text-shadow: 2px 2px 0px #ffe0e8;
     }
     body.death-mode h1 {
       color: #ff0000 !important;
-      text-shadow: 0 0 10px #ff0000 !important;
+      text-shadow: 0 0 15px #ff0000 !important;
     }
 
     /* 折りたたみルールのスタイル */
     .rules-details {
       width: 100%;
-      max-width: 680px;
+      max-width: 800px;
+      margin-bottom: 10px;
       background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #ffccd5;
-      border-radius: 8px;
-      margin-bottom: 2px;
-      flex-shrink: 0;
+      border: 2px solid #ffccd5;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(255, 182, 193, 0.3);
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+    body.death-mode .rules-details {
+      background: rgba(26, 0, 0, 0.9);
+      border-color: #5a0e0e;
     }
     .rules-summary {
-      padding: 2px 6px;
-      font-size: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
       font-weight: bold;
       color: #ff6688;
       cursor: pointer;
       user-select: none;
       background: #ffe6ec;
       display: flex;
+      align-items: center;
       justify-content: space-between;
     }
+    body.death-mode .rules-summary {
+      background: #330000;
+      color: #ff5555;
+    }
     .rules-content {
-      padding: 4px 8px;
-      font-size: 10px;
-      line-height: 1.3;
+      padding: 10px 15px;
+      font-size: 12px;
+      line-height: 1.6;
       color: #5a4048;
-      max-height: 80px;
-      overflow-y: auto;
+    }
+    body.death-mode .rules-content {
+      color: #ffaaaa;
+    }
+    .rules-content ul {
+      margin: 4px 0 0 0;
+      padding-left: 20px;
+    }
+    .rules-content li {
+      margin-bottom: 4px;
     }
 
     /* 音量調整バー */
     .volume-container {
       background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #ffccd5;
-      border-radius: 10px;
-      padding: 2px 8px;
-      margin-bottom: 2px;
-      font-size: 10px;
+      border: 2px solid #ffccd5;
+      border-radius: 20px;
+      padding: 4px 15px;
+      margin-bottom: 10px;
+      font-size: 12px;
       font-weight: bold;
       color: #ff7799;
       display: flex;
       align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
+      gap: 8px;
+      box-shadow: 0 2px 5px rgba(255, 182, 193, 0.4);
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .volume-container input {
       accent-color: #ff7799;
       cursor: pointer;
-      width: 70px;
     }
 
+    /* BGM切り替えボタン */
     .bgm-btn {
       background: #ff7799;
       color: white;
       border: none;
-      padding: 1px 6px;
-      border-radius: 8px;
-      font-size: 9px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
       cursor: pointer;
+      margin-left: 5px;
     }
-    .bgm-btn.active { background: #4db6ac; }
+    .bgm-btn.active {
+      background: #4db6ac;
+    }
 
     /* HPゲージ */
     .hp-container {
       width: 100%;
-      max-width: 680px;
+      max-width: 800px;
       background: rgba(255, 255, 255, 0.9);
-      border: 2px solid #ffb6c1;
-      border-radius: 10px;
-      padding: 2px 8px;
-      margin-bottom: 3px;
-      flex-shrink: 0;
+      border: 3px solid #ffb6c1;
+      border-radius: 15px;
+      padding: 6px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+    }
+    body.death-mode .hp-container {
+      background: rgba(26, 0, 0, 0.9);
+      border-color: #880000;
+      box-shadow: 0 0 15px #ff0000;
     }
     .hp-header {
       display: flex;
       justify-content: space-between;
       font-weight: bold;
-      font-size: 10px;
-      margin-bottom: 1px;
+      font-size: 13px;
+      margin-bottom: 4px;
       color: #ff6688;
     }
+    body.death-mode .hp-header { color: #ff4444; }
     .hp-bar-outer {
       width: 100%;
-      height: 10px;
+      height: 18px;
       background: #ffe6eb;
-      border-radius: 5px;
+      border-radius: 10px;
       overflow: hidden;
     }
+    body.death-mode .hp-bar-outer { background: #330000; }
     .hp-bar-inner {
       height: 100%;
       width: 100%;
       background: linear-gradient(90deg, #ff99bb, #ff5588);
-      border-radius: 5px;
+      border-radius: 10px;
       transition: width 0.3s ease;
     }
+    body.death-mode .hp-bar-inner { background: #ff0000; }
     
     .game-layout {
       display: flex;
-      gap: 8px;
-      max-width: 980px;
+      gap: 15px;
+      max-width: 1200px;
       width: 100%;
-      flex: 1;
+      flex-wrap: wrap;
       justify-content: center;
-      min-height: 0;
-      overflow: hidden;
     }
 
-    /* 麻雀ボード本体 */
     .game-board {
-      background-color: rgba(255, 240, 243, 0.95);
-      border: 3px solid #ffb6c1;
-      border-radius: 14px;
+      background-color: rgba(255, 240, 243, 0.92);
+      border: 4px solid #ffb6c1;
+      border-radius: 20px;
       flex: 1;
       width: 100%;
-      max-width: 680px;
-      padding: 6px 8px;
-      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4);
+      max-width: 800px;
+      padding: 12px;
+      box-shadow: 0 8px 15px rgba(255, 182, 193, 0.4);
       position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
+      backdrop-filter: blur(4px);
     }
     body.death-mode .game-board {
-      background-color: rgba(43, 8, 8, 0.95);
+      background-color: rgba(43, 8, 8, 0.92);
       border-color: #5a0e0e;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
     }
 
-    /* ランキングボード */
+    /* 折りたたみ式 ランキングボード */
     .ranking-board {
-      background-color: rgba(255, 255, 255, 0.95);
-      border: 2px solid #ffccd5;
-      border-radius: 14px;
-      width: 220px;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
+      background-color: rgba(255, 255, 255, 0.92);
+      border: 3px solid #ffccd5;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 800px;
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
+      backdrop-filter: blur(4px);
       overflow: hidden;
     }
+    body.death-mode .ranking-board {
+      background-color: rgba(21, 0, 0, 0.92);
+      border-color: #5a0e0e;
+    }
     .ranking-summary {
-      font-size: 11px;
+      font-size: 14px;
       font-weight: bold;
       color: #ff6688;
       text-align: center;
-      padding: 6px;
+      padding: 10px 15px;
       cursor: pointer;
+      user-select: none;
       background: #ffe6ec;
+      list-style: none;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+    }
+    body.death-mode .ranking-summary {
+      background: #330000;
+      color: #ff5555;
     }
     .ranking-content {
-      padding: 6px;
+      padding: 12px;
+      max-height: 400px;
       overflow-y: auto;
-      flex: 1;
     }
     .ranking-list { list-style: none; padding: 0; margin: 0; }
     .ranking-item {
       background: #fff5f7;
-      margin-bottom: 3px;
-      padding: 4px 6px;
-      border-radius: 6px;
-      font-size: 10px;
-      border-left: 3px solid #ff88aa;
+      margin-bottom: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      border-left: 4px solid #ff88aa;
+    }
+    body.death-mode .ranking-item {
+      background: rgba(0,0,0,0.6);
+      border-left-color: #ff0000;
     }
     .ranking-item .rank-head { font-weight: bold; color: #ff5577; display: flex; justify-content: space-between; }
-    .ranking-item .rank-player { color: #5a4048; font-size: 9px; }
-    .ranking-item .rank-detail { font-size: 9px; color: #886670; }
+    .ranking-item .rank-player { color: #5a4048; font-size: 11px; margin-top: 2px; }
+    body.death-mode .ranking-item .rank-player { color: #ffffff; }
+    .ranking-item .rank-detail { font-size: 10px; color: #886670; margin-top: 2px; }
 
     .info-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #ffffff;
-      padding: 3px 8px;
-      border-radius: 8px;
-      font-size: 10px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 12px;
       font-weight: bold;
       color: #775560;
-      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 6px;
     }
+    body.death-mode .info-bar { background: rgba(0,0,0,0.5); color: #ffaaaa; }
 
-    .dora-area { display: flex; align-items: center; gap: 2px; }
+    .dora-area { display: flex; align-items: center; gap: 4px; }
 
     .tenpai-info-bar {
       background: #ffe6ec;
       border: 1px solid #ffb6c1;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-size: 10px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
       color: #ff5577;
       display: flex;
       align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
+      gap: 6px;
+      min-height: 38px;
     }
+    body.death-mode .tenpai-info-bar { background: rgba(255,0,0,0.2); border-color: #ff3333; color: #ff9999; }
 
     .status-badge {
       background-color: #ff6688;
       color: white;
-      padding: 1px 4px;
-      border-radius: 6px;
-      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
       display: none;
     }
-
     .river-section {
+      min-height: 90px;
       background: #ffffff;
-      border-radius: 8px;
-      padding: 4px 6px;
-      border: 1px dashed #ffccd5;
-      flex: 1;
-      min-height: 45px;
-      max-height: 65px;
-      overflow-y: auto;
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 2px dashed #ffccd5;
     }
-    .river-title { font-size: 9px; color: #ff7799; font-weight: bold; margin-bottom: 1px; }
-    .tile-container { display: flex; flex-wrap: wrap; gap: 2px; }
+    body.death-mode .river-section { background: rgba(0,0,0,0.4); border-color: #880000; }
+    .river-title { font-size: 11px; color: #ff7799; margin-bottom: 4px; font-weight: bold; }
+    .tile-container { display: flex; flex-wrap: wrap; gap: 3px; }
     
     .hand-section {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 4px;
-      flex-shrink: 0;
+      gap: 6px;
+      margin-top: 10px;
+      touch-action: manipulation;
     }
     .hand-tiles-area {
       display: flex;
       flex-wrap: nowrap;
       gap: 2px;
       overflow-x: auto;
-      padding-bottom: 2px;
+      padding-bottom: 4px;
     }
 
-    /* 💡 スマホの画面横幅に完璧に自動フィットする牌サイズ */
     .tile {
-      width: calc((100vw - 45px) / 14);
-      max-width: 30px;
-      min-width: 18px;
-      height: 38px;
+      width: calc((100vw - 70px) / 14);
+      max-width: 40px;
+      min-width: 22px;
+      height: 52px;
       background: #ffffff;
       color: #443338;
-      border-radius: 4px;
-      border-bottom: 2px solid #e6ccd3;
-      box-shadow: 0 1px 2px rgba(255, 182, 193, 0.4);
+      border-radius: 6px;
+      border-bottom: 3px solid #e6ccd3;
+      box-shadow: 0 2px 4px rgba(255, 182, 193, 0.4);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -327,99 +370,123 @@
       font-weight: bold;
       position: relative;
       flex-shrink: 0;
+      transition: transform 0.1s, opacity 0.3s, border-color 0.3s;
     }
-    .tile:active { transform: translateY(-2px); background-color: #fff0f3; }
-    .tile.riichi-target { border: 2px solid #ff4477; animation: pulse 1s infinite; }
+    .tile:active { transform: translateY(-3px); background-color: #fff0f3; }
+    .tile.riichi-target {
+      border: 2px solid #ff4477;
+      animation: pulse 1s infinite;
+    }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0.7); }
-      70% { box-shadow: 0 0 0 5px rgba(255, 68, 119, 0); }
+      70% { box-shadow: 0 0 0 8px rgba(255, 68, 119, 0); }
       100% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0); }
     }
 
+    /* 爆発・飛び演出用アニメーション */
     .tile.destroying {
-      animation: popDestroyAnim 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+      animation: popDestroyAnim 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
       z-index: 50;
       pointer-events: none;
     }
     @keyframes popDestroyAnim {
       0% { transform: scale(1) translateY(0); filter: brightness(1); opacity: 1; }
-      30% { transform: scale(1.2) translateY(-6px); filter: brightness(1.5); background-color: #ff3366; color: #fff; }
-      100% { transform: scale(0.2) translateY(-40px) rotate(20deg); opacity: 0; }
+      30% { transform: scale(1.25) translateY(-10px); filter: brightness(1.6); background-color: #ff3366; color: #fff; box-shadow: 0 0 15px #ff0055; }
+      100% { transform: scale(0.2) translateY(-60px) rotate(25deg); opacity: 0; filter: brightness(2); }
     }
 
-    .tile.slide-in { animation: slideInAnim 0.4s ease-out forwards; }
+    /* 上からスッと落ちてフェードインで入る演出 */
+    .tile.slide-in {
+      animation: slideInAnim 0.55s ease-out forwards;
+    }
     @keyframes slideInAnim {
-      0% { transform: translateY(-20px) scale(0.8); opacity: 0; }
+      0% { transform: translateY(-35px) scale(0.85); opacity: 0; }
+      70% { transform: translateY(4px) scale(1.03); opacity: 0.9; }
       100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
-    .tile.new-drawn { border: 2px solid #00bfa5 !important; }
+    /* 新しく補充された牌の枠線ハイライト */
+    .tile.new-drawn {
+      border: 2px solid #00bfa5 !important;
+      box-shadow: 0 0 10px rgba(0, 191, 165, 0.6) !important;
+    }
 
     .tile.red { color: #e04466; }
     .tile.green { color: #27ae60; }
     .tile.black { color: #443338; }
     .tile.aka-dora { background-color: #ffe6ec; }
-    .tile-num { font-size: 11px; line-height: 1; }
-    .tile-type { font-size: 7px; margin-top: 1px; }
+    .tile-num { font-size: 15px; line-height: 1; }
+    .tile-type { font-size: 9px; margin-top: 1px; }
 
-    .tile.small { width: 18px; height: 24px; border-bottom: 1px solid #e6ccd3; }
-    .tile.small .tile-num { font-size: 9px; }
-    .tile.small .tile-type { font-size: 6px; }
+    .tile.small {
+      width: 24px;
+      height: 34px;
+      border-bottom: 2px solid #e6ccd3;
+    }
+    .tile.small .tile-num { font-size: 11px; }
+    .tile.small .tile-type { font-size: 8px; }
 
-    .drawn-tile-area { border-left: 2px dashed #ffb6c1; padding-left: 4px; flex-shrink: 0; }
+    .drawn-tile-area {
+      border-left: 2px dashed #ffb6c1;
+      padding-left: 6px;
+      flex-shrink: 0;
+    }
 
-    /* 💡 ボタンをコンパクトにまとめて絶対に溢れないように調整 */
     .controls {
+      margin-top: 15px;
       display: flex;
       justify-content: center;
-      gap: 3px;
+      gap: 6px;
       flex-wrap: wrap;
-      flex-shrink: 0;
     }
     button {
       background-color: #ff88aa;
       border: none;
       color: white;
-      padding: 4px 8px;
-      font-size: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: 15px;
       cursor: pointer;
-      box-shadow: 0 2px 0 #e06688;
+      box-shadow: 0 3px 0 #e06688;
       touch-action: manipulation;
     }
-    button:active { transform: translateY(1px); box-shadow: none; }
-    button:disabled { background-color: #ddccdd; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
-    button.btn-riichi { background-color: #ff5577; }
-    button.btn-kan { background-color: #ba68c8; }
-    button.btn-sacrifice { background-color: #4db6ac; }
-    button.btn-kyushu { background-color: #ff9800; }
-    button.btn-cancel { background-color: #b0bec5; }
+    button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e06688; }
+    button:disabled { background-color: #ddccdd; box-shadow: 0 3px 0 #bbaa33; cursor: not-allowed; opacity: 0.6; }
+    button.btn-riichi { background-color: #ff5577; box-shadow: 0 3px 0 #cc3355; }
+    button.btn-kan { background-color: #ba68c8; box-shadow: 0 3px 0 #8e24aa; }
+    button.btn-sacrifice { background-color: #4db6ac; box-shadow: 0 3px 0 #00897b; }
+    button.btn-kyushu { background-color: #ff9800; box-shadow: 0 3px 0 #f57c00; }
+    button.btn-cancel { background-color: #b0bec5; box-shadow: 0 3px 0 #78909c; margin-top: 8px; }
 
     button.btn-win-glow {
       background-color: #ff4081 !important;
+      box-shadow: 0 3px 0 #c2185b !important;
       animation: winGlow 0.8s infinite alternate;
     }
     @keyframes winGlow {
-      0% { transform: scale(1); box-shadow: 0 0 3px #ff4081; }
-      100% { transform: scale(1.05); box-shadow: 0 0 8px #ffd54f; }
+      0% { transform: scale(1); box-shadow: 0 0 5px #ff4081; }
+      100% { transform: scale(1.05); box-shadow: 0 0 15px #ffd54f; }
     }
 
     .result-box {
+      margin-top: 12px;
       background: #ffffff;
-      border-radius: 8px;
-      padding: 2px 6px;
+      border-radius: 12px;
+      padding: 8px;
       text-align: center;
-      min-height: 26px;
-      border: 1px solid #ffccd5;
-      flex-shrink: 0;
+      min-height: 40px;
+      border: 2px solid #ffccd5;
     }
-    .result-title { font-size: 12px; font-weight: bold; color: #ff5577; }
-    .yaku-list { font-size: 10px; color: #665560; }
-    .score-detail { font-size: 11px; color: #009688; font-weight: bold; }
-    .error-msg { font-size: 9px; color: #e53935; }
+    body.death-mode .result-box { background: rgba(0,0,0,0.8); border-color: #880000; }
+    .result-title { font-size: 18px; font-weight: bold; color: #ff5577; }
+    body.death-mode .result-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    .yaku-list { margin: 4px 0; font-size: 12px; color: #665560; }
+    body.death-mode .yaku-list { color: #ffaaaa; }
+    .score-detail { font-size: 14px; color: #009688; font-weight: bold; }
+    .error-msg { font-size: 12px; color: #e53935; margin-top: 4px; }
 
-    /* モーダル表示領域 */
+    /* 麻雀操作画面内部にだけ収まるモーダル設定 */
     .modal-overlay {
       position: absolute !important;
       top: 0 !important;
@@ -427,105 +494,180 @@
       width: 100% !important;
       height: 100% !important;
       background: rgba(30, 20, 25, 0.94);
-      border-radius: 14px;
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
       z-index: 100 !important;
-      padding: 10px;
+      padding: 15px;
       text-align: center;
       overflow-y: auto;
     }
-    .modal-title { font-size: 15px; font-weight: bold; color: #ffffff; text-shadow: 0 0 6px #ff7799; }
-    .modal-desc { font-size: 10px; color: #ffe6ec; }
+    body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.94); }
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px #ff7799;
+    }
+    body.death-mode .modal-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    .modal-desc {
+      font-size: 12px;
+      color: #ffe6ec;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+    body.death-mode .modal-desc { color: #cccccc; }
 
     #dodge-canvas {
       background: #11080c;
-      border: 2px solid #ff88aa;
-      border-radius: 6px;
+      border: 3px solid #ff88aa;
+      border-radius: 10px;
       max-width: 100%;
+      box-shadow: 0 0 15px rgba(255, 136, 170, 0.3);
     }
 
+    /* スマホ用 十字キーUIスタイル */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 34px);
-      grid-template-rows: repeat(2, 34px);
-      gap: 3px;
+      grid-template-columns: repeat(3, 42px);
+      grid-template-rows: repeat(2, 42px);
+      gap: 4px;
+      margin-top: 6px;
       justify-content: center;
+      user-select: none;
     }
     .dpad-btn {
       background: #ffb6c1;
       border: 1px solid #ff88aa;
       color: #ffffff;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
-      border-radius: 6px;
+      border-radius: 10px;
       display: flex;
       justify-content: center;
       align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #e06688;
+      touch-action: manipulation;
+    }
+    .dpad-btn:active {
+      background: #ff88aa;
+      transform: translateY(2px);
+      box-shadow: none;
     }
 
-    .quiz-options { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 240px; }
-    .quiz-btn { background: #ffffff; border: 1px solid #ff88aa; color: #ff5577; padding: 5px; border-radius: 8px; font-weight: bold; font-size: 10px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; }
+    .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 8px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .quiz-btn:hover { background: #ffe6ec; }
     
+    /* フラッシュ暗算 数字アニメーション演出 */
     .flash-num {
-      font-size: 38px;
+      font-size: 52px;
       font-weight: bold;
       color: #ffffff;
-      text-shadow: 0 0 10px #ff7799;
-      height: 50px;
+      text-shadow: 0 0 15px #ff7799;
+      height: 70px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    .flash-input { font-size: 14px; padding: 2px; width: 90px; text-align: center; border: 1px solid #ff88aa; border-radius: 6px; }
+    .flash-num.pop {
+      animation: flashPop 0.25s ease-out;
+    }
+    @keyframes flashPop {
+      0% { transform: scale(0.6); opacity: 0.3; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); }
+    }
 
-    .coin-img { font-size: 32px; }
+    .flash-input { font-size: 18px; padding: 4px; width: 110px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
+
+    .coin-img { font-size: 44px; transition: transform 0.5s; }
 
     .mentsu-option-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 4px;
+      gap: 8px;
       background: #ffffff;
-      border: 1px solid #ff88aa;
-      padding: 3px 6px;
-      border-radius: 8px;
+      border: 2px solid #ff88aa;
+      padding: 6px 10px;
+      border-radius: 12px;
       cursor: pointer;
+      margin-bottom: 6px;
       width: 100%;
-      max-width: 280px;
+      max-width: 320px;
     }
+    .mentsu-option-btn:hover { background: #ffe6ec; }
 
-    .game-footer { display: none; }
+    /* 権利表記＆フッター領域 */
+    .game-footer {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #ffccd5;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 11px;
+      color: #775560;
+      line-height: 1.6;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      backdrop-filter: blur(4px);
+    }
+    body.death-mode .game-footer {
+      background: rgba(20, 0, 0, 0.85);
+      border-color: #5a0e0e;
+      color: #ff8888;
+    }
+    .game-footer strong {
+      color: #ff5577;
+    }
+    body.death-mode .game-footer strong {
+      color: #ff3333;
+    }
   </style>
 </head>
 <body>
 
+  <!-- フェードイン背景用レイヤー -->
   <div id="bg-layer"></div>
 
   <h1>🌸 ふわふわ麻雀 🌸</h1>
 
+  <!-- 折りたたみルール表記 -->
   <details class="rules-details">
-    <summary class="rules-summary"><span>📜 全体ルールを見る</span><span>▼</span></summary>
+    <summary class="rules-summary">📜 全体ルールを見る（タップで開閉）</summary>
     <div class="rules-content">
       <ul>
-        <li><b>HP</b>: 初期1000。毎打牌-50（0でゲームオーバー）。</li>
-        <li><b>リーチ中</b>: 打牌によるHP減少が停止！</li>
-        <li><b>面子犠牲・カン</b>: HP回復可能（キャンセル可）。</li>
-        <li><b>リーチ試練</b>: コイントス または「丁と半」から選択可能！</li>
-        <li><b>10打牌ごと</b>: ミニゲームや手牌シャッフルが発生。</li>
+        <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
+        <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
+        <li><b>ドラDiscardのペンダント</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
+        <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
+        <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
+        <li><b>九種九牌</b>: 一九字牌が9種以上あればボタン出現。全牌を山札に戻して引き直し。</li>
+        <li><b>リーチ試選</b>: コイントス または「丁と半」の2択から選択可能！（丁・半は2回まで挑戦）</li>
+        <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
+        <li><b>アガリの試練</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>リーチ中に失敗するとリーチが解除</b>されます。</li>
       </ul>
     </div>
   </details>
 
+  <!-- 音量スライダー＆BGM切替 -->
   <div class="volume-container">
-    <span>🔊</span>
+    <span>🔊 音量:</span>
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" oninput="updateVolume(this.value)">
+    <span id="volume-text">30%</span>
     <button id="bgm-toggle-btn" class="bgm-btn" onclick="toggleBGM()">🎵 BGM: OFF</button>
   </div>
 
+  <!-- HPバー -->
   <div class="hp-container">
     <div class="hp-header">
       <span>たいりょく (HP)</span>
@@ -539,12 +681,12 @@
   <div class="game-layout">
     <div class="game-board" id="game-board">
       <div class="info-bar">
-        <div>自風: <span style="color:#ff5577;">東家</span></div>
+        <div>自風: <span style="color:#ff5577;">東家（親）</span></div>
         <div>残り: <span id="deck-count">0</span></div>
-        <div>打牌: <span id="turn-count">0</span></div>
+        <div>打牌数: <span id="turn-count">0</span></div>
         <div class="dora-area">
           <span>ドラ:</span>
-          <div id="dora-tile-container" style="display:flex; gap:1px;"></div>
+          <div id="dora-tile-container" style="display:flex; gap:2px;"></div>
         </div>
         <div id="riichi-badge" class="status-badge">リーチ中</div>
       </div>
@@ -574,8 +716,8 @@
       </div>
 
       <div class="controls">
-        <button id="btn-sacrifice" class="btn-sacrifice" onclick="onClickSacrificeButton()" style="display:none;">面子回復</button>
-        <button id="btn-kyushu" class="btn-kyushu" onclick="execKyushuKyuhai()" style="display:none;">九種九牌</button>
+        <button id="btn-sacrifice" class="btn-sacrifice" onclick="onClickSacrificeButton()" style="display:none;">面子捧げて回復</button>
+        <button id="btn-kyushu" class="btn-kyushu" onclick="execKyushuKyuhai()" style="display:none;">九種九牌（流局）</button>
         <button id="btn-kan" class="btn-kan" onclick="onClickKanButton()" style="display:none;">カン</button>
         <button id="btn-riichi" class="btn-riichi" onclick="startRiichiSelect()" disabled>リーチ</button>
         <button id="btn-win" onclick="startAgariSequence()">ツモアガリ</button>
@@ -583,6 +725,7 @@
         <button onclick="initGame()">最初から</button>
       </div>
 
+      <!-- 麻雀操作画面内部にだけ表示されるミニゲーム画面 -->
       <div id="game-modal" class="modal-overlay" style="display:none;">
         <div class="modal-title" id="modal-title">イベント発生</div>
         <div class="modal-desc" id="modal-desc">説明文</div>
@@ -590,23 +733,34 @@
       </div>
     </div>
 
+    <!-- 折りたたみ式 ランキングボード（全員表示） -->
     <details class="ranking-board">
       <summary class="ranking-summary">
-        <span>✨ 英雄一覧</span>
-        <span style="font-size:9px;">(開閉)</span>
+        <span>✨ 絶望を生き延びた者達一覧</span>
+        <span style="font-size:11px; font-weight:normal;">（タップで開閉）</span>
       </summary>
       <div class="ranking-content">
         <ol class="ranking-list" id="ranking-list">
-          <li class="ranking-item" style="text-align:center;">読込中...</li>
+          <li class="ranking-item" style="text-align:center;">読み込み中...</li>
         </ol>
-        <div style="text-align: center; margin-top: 4px;">
-          <button onclick="fetchGlobalRanking()" style="padding: 2px 6px; font-size: 9px;">更新</button>
+        <div style="text-align: center; margin-top: 10px;">
+          <button onclick="fetchGlobalRanking()" style="padding: 4px 10px; font-size: 11px;">更新</button>
         </div>
       </div>
     </details>
   </div>
 
+  <!-- フッター -->
+  <footer class="game-footer">
+    <div><strong>Developer / Copyright:</strong> NextFeed</div>
+    <div>🎮 <strong>動画配信・実況について:</strong> YouTube・Twitch等の動画配信・実況での使用・収益化は制限なく<b>OK</b>です！</div>
+    <div>✨ 可能であれば概要欄等に本ゲームのタイトルやリンク等のクレジット記載をお願いいたします。</div>
+  </footer>
+
   <script>
+    // ==========================================
+    // ⚙️ SUPABASE 接続設定
+    // ==========================================
     const SUPABASE_URL = 'https://fxexiflthgohhqafddhr.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_0iMq0Jf5FmetEP1Ktw2VYg_W3lGJmjz';
     
@@ -615,13 +769,25 @@
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    const BG_IMAGES = { normal: './bg_normal.jpg', death: './bg_death.jpg' };
-    const BGM_URLS = { normal: './bgm_normal.mp3', riichi: './bgm_riichi.mp3' };
+    // ==========================================
+    // 🖼️ 背景画像 ＆ 🎵 BGM 相対パス設定エリア
+    // ==========================================
+    const BG_IMAGES = {
+      normal: './bg_normal.jpg',
+      death: './bg_death.jpg'
+    };
+
+    const BGM_URLS = {
+      normal: './bgm_normal.mp3',
+      riichi: './bgm_riichi.mp3'
+    };
 
     function updateBackgroundImage(isDeath = false) {
       const bgLayer = document.getElementById('bg-layer');
       if (!bgLayer) return;
+
       const targetImg = isDeath ? BG_IMAGES.death : BG_IMAGES.normal;
+
       if (targetImg) {
         bgLayer.style.backgroundImage = `url('${targetImg}')`;
         setTimeout(() => bgLayer.classList.add('active'), 50);
@@ -630,6 +796,7 @@
       }
     }
 
+    // --- BGM 管理システム ---
     let currentBgmAudio = null;
     let isBgmEnabled = false;
 
@@ -652,30 +819,40 @@
       if (!isBgmEnabled) return;
       const url = BGM_URLS[type];
       if (!url) return;
-      if (currentBgmAudio && currentBgmAudio.src.includes(url.replace('./', ''))) return;
+
+      if (currentBgmAudio && currentBgmAudio.src.includes(url.replace('./', ''))) {
+        return;
+      }
+
       stopBGM();
+
       currentBgmAudio = new Audio(url);
       currentBgmAudio.loop = true;
       currentBgmAudio.volume = globalVolume;
-      currentBgmAudio.play().catch(e => console.log('BGM Error:', e));
+      currentBgmAudio.play().catch(e => console.log('BGM Play Error:', e));
     }
 
     function stopBGM() {
-      if (currentBgmAudio) { currentBgmAudio.pause(); currentBgmAudio = null; }
+      if (currentBgmAudio) {
+        currentBgmAudio.pause();
+        currentBgmAudio = null;
+      }
     }
 
+    // --- 音量コントロール変数 ---
     let globalVolume = 0.3;
     function updateVolume(val) {
       globalVolume = parseFloat(val);
+      document.getElementById('volume-text').innerText = `${Math.round(globalVolume * 100)}%`;
       if (currentBgmAudio) currentBgmAudio.volume = globalVolume;
     }
 
+    // --- Web Audio API (SE) ---
     let audioCtx = null;
     function initAudio() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
-
     function playSE(type) {
       if (globalVolume <= 0) return;
       initAudio();
@@ -751,6 +928,7 @@
       }
     }
 
+    // --- 麻雀ゲーム本体変数 ---
     const SUITS = { m: '萬', p: '筒', s: '索' };
     const HONORS = ['東', '南', '西', '北', '白', '發', '中'];
     const YAOCHU_KEYS = ['m_1','m_9','p_1','p_9','s_1','s_9','z_1','z_2','z_3','z_4','z_5','z_6','z_7'];
@@ -765,28 +943,38 @@
     let flashCountdownTimer = null;
     let hp = 1000;
     const MAX_HP = 1000;
+
     let keys = {};
 
     const QUIZ_DB = [
-      { q: "麻雀のローカル役で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
+      { q: "麻雀の「ローカル役」で実在するのは？", a: "十三不塔", b: "九蓮宝塔", ans: "a" },
       { q: "光の速度はどっちが近い？", a: "秒速30万km", b: "秒速300万km", ans: "a" },
       { q: "日本で一番広い都道府県は？", a: "北海道", b: "岩手県", ans: "a" },
       { q: "将棋の盤面はマス目がいくつ？", a: "81マス", b: "64マス", ans: "a" },
       { q: "富士山の標高は？", a: "3776m", b: "3876m", ans: "a" },
+      { q: "エベレストの標高は？", a: "8848m", b: "8888m", ans: "a" },
       { q: "世界で一番面積が大きい国は？", a: "ロシア", b: "カナダ", ans: "a" },
       { q: "オーストラリアの首都は？", a: "キャンベラ", b: "シドニー", ans: "a" },
       { q: "ブラジルの公用語は？", a: "ポルトガル語", b: "スペイン語", ans: "a" },
       { q: "エジプトの首都は？", a: "カイロ", b: "アレクサンドリア", ans: "a" },
       { q: "世界で一番長い川は？", a: "ナイル川", b: "アマゾン川", ans: "a" },
+      { q: "イタリアの首都は？", a: "ローマ", b: "ミラノ", ans: "a" },
       { q: "元素記号「Fe」は何の金属？", a: "鉄", b: "フッ素", ans: "a" },
       { q: "太陽系の惑星で最大のものは？", a: "木星", b: "土星", ans: "a" },
       { q: "ヒトの体で最も重い臓器は？", a: "肝臓", b: "皮膚", ans: "a" },
-      { q: "水の化学式はどれ？", a: "H2O", b: "CO2", ans: "a" }
+      { q: "水の化学式はどれ？", a: "H2O", b: "CO2", ans: "a" },
+      { q: "光合成で植物が吸収する気体は？", a: "二酸化炭素", b: "酸素", ans: "a" },
+      { q: "ペンギンは空を飛べる？", a: "飛べない", b: "飛べる", ans: "a" }
     ];
-    for(let i=0; i<30; i++) {
+    for(let i=0; i<40; i++) {
       let n1 = Math.floor(Math.random()*89)+10;
       let n2 = Math.floor(Math.random()*89)+10;
-      QUIZ_DB.push({ q: `計算クイズ: ${n1} × ${n2} の一の位は？`, a: `${(n1*n2)%10}`, b: `${((n1*n2)+3)%10}`, ans: "a" });
+      QUIZ_DB.push({
+        q: `高度計算クイズ: ${n1} × ${n2} の一の位は？`,
+        a: `${(n1*n2)%10}`,
+        b: `${((n1*n2)+3)%10}`,
+        ans: "a"
+      });
     }
 
     function createDeck() {
@@ -855,6 +1043,7 @@
       closeModal();
       clearMessages();
       updateHP(0);
+
       playBGM('normal');
 
       for (let i = 0; i < 13; i++) hand.push(deck.pop());
@@ -871,10 +1060,10 @@
           deck = [...river].sort(() => Math.random() - 0.5);
           river = [];
           updateHP(500);
-          openModal("🔄 山札リセット！", "捨て牌が山札に戻りHP500回復！", "");
-          setTimeout(() => closeModal(), 1500);
+          openModal("🔄 山札リセット！", "捨て牌が全て山札に戻り、シャッフルされました！HPが500回復！", "");
+          setTimeout(() => closeModal(), 1800);
         } else {
-          showMessage('流局', '引ける牌がありません。', '');
+          showMessage('流局', '引ける牌が完全になくなりました。', '');
           isGameOver = true;
           drawnTile = null;
           return;
@@ -962,12 +1151,14 @@
       }
       drawnTile = deck.pop();
       if(drawnTile) newAddedIds.push(drawnTile.id);
+
       sortTiles(hand);
       render(newAddedIds, []);
     }
 
     function removeRandomTiles(num, callback) {
-      closeModal();
+      closeModal(); // モーダルを先に閉じることで、ウィンドウ外に牌が飛ぶ演出が見えるようにする
+      
       setTimeout(() => {
         playSE('destroy');
         let targetTileIds = [];
@@ -991,15 +1182,17 @@
         let allTileElements = document.querySelectorAll('.tile');
         allTileElements.forEach(el => {
           let tileId = parseInt(el.dataset.id);
-          if (targetTileIds.includes(tileId)) el.classList.add('destroying');
+          if (targetTileIds.includes(tileId)) {
+            el.classList.add('destroying');
+          }
         });
 
         setTimeout(() => {
           sortTiles(hand);
           render(newAddedTileIds, []);
           if (callback) callback();
-        }, 650);
-      }, 50);
+        }, 750);
+      }, 100);
     }
 
     function countYaochuTypes(tiles) {
@@ -1014,10 +1207,12 @@
     function execKyushuKyuhai() {
       if (isGameOver) return;
       playSE('sort');
-      openModal("🀄 九種九牌", "山札に戻して引き直します！", "");
+      openModal("🀄 九種九牌（流局）！", "手牌の九種九牌を倒し、全て山札に戻して引き直します！", "");
+
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
       deck = [...deck, ...fullTiles].sort(() => Math.random() - 0.5);
+
       hand = [];
       drawnTile = null;
 
@@ -1031,14 +1226,16 @@
         sortTiles(hand);
         drawTile();
         if (drawnTile) newIds.push(drawnTile.id);
+
         closeModal();
         render(newIds, []);
-      }, 1200);
+      }, 1500);
     }
 
     function findAvailableMentsu(tiles) {
       let counts = getTileCounts(tiles);
       let list = [];
+
       for (let k in counts) {
         if (counts[k] >= 3) {
           let [type, valStr] = k.split('_'), val = parseInt(valStr);
@@ -1046,12 +1243,15 @@
           list.push({ type: 'kotsu', tiles: matched });
         }
       }
+
       ['m', 'p', 's'].forEach(type => {
         for (let n = 1; n <= 7; n++) {
           let t1 = tiles.find(t => t.type === type && t.val === n);
           let t2 = tiles.find(t => t.type === type && t.val === n + 1);
           let t3 = tiles.find(t => t.type === type && t.val === n + 2);
-          if (t1 && t2 && t3) list.push({ type: 'shuntsu', tiles: [t1, t2, t3] });
+          if (t1 && t2 && t3) {
+            list.push({ type: 'shuntsu', tiles: [t1, t2, t3] });
+          }
         }
       });
       return list;
@@ -1060,25 +1260,31 @@
     function onClickSacrificeButton() {
       if (isGameOver) return;
       if (turn - lastSacrificeTurn < 5) return;
+
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
+
       let mentsuList = findAvailableMentsu(fullTiles);
       if (mentsuList.length === 0) return;
 
-      let html = '<div style="display:flex; flex-direction:column; gap:4px; width:100%; align-items:center;">';
+      let html = '<div style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">';
       mentsuList.forEach((m, idx) => {
         let hasDora = m.tiles.some(t => isTileDora(t));
         let healAmt = hasDora ? 400 : 200;
         html += `<div class="mentsu-option-btn" onclick="execSacrificeMentsuByIndex(${idx});">`;
-        html += '<div style="display:flex; gap:1px;">';
-        m.tiles.forEach(t => { html += createTileElement(t, null, true).outerHTML; });
+        html += '<div style="display:flex; gap:3px;">';
+        m.tiles.forEach(t => {
+          let el = createTileElement(t, null, true);
+          html += el.outerHTML;
+        });
         html += '</div>';
-        html += `<span style="color:${hasDora ? '#ff9800' : '#4db6ac'}; font-weight:bold; font-size:10px;">捧げる (+${healAmt})</span></div>`;
+        html += `<span style="color:${hasDora ? '#ff9800' : '#4db6ac'}; font-weight:bold; font-size:13px;">を捧げる (+${healAmt})</span></div>`;
       });
       html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
+
       window.currentMentsuList = mentsuList;
-      openModal("面子犠牲選択", "ドラ含むと+400回復", html);
+      openModal("犠牲にする面子を選択", "ドラを含む面子はHPが400回復します！", html);
     }
 
     function execSacrificeMentsuByIndex(idx) {
@@ -1089,64 +1295,94 @@
     }
 
     function execSacrificeMentsu(mentsuObj) {
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+
       let hasDora = mentsuObj.tiles.some(t => isTileDora(t));
       let healAmount = hasDora ? 400 : 200;
+
       closeModal();
       lastSacrificeTurn = turn;
 
       setTimeout(() => {
         playSE('destroy');
         let destroyIds = mentsuObj.tiles.map(t => t.id);
-        document.querySelectorAll('.tile').forEach(el => {
-          if (destroyIds.includes(parseInt(el.dataset.id))) el.classList.add('destroying');
+
+        let allTileEls = document.querySelectorAll('.tile');
+        allTileEls.forEach(el => {
+          let id = parseInt(el.dataset.id);
+          if (destroyIds.includes(id)) {
+            el.classList.add('destroying');
+          }
         });
 
         setTimeout(() => {
           mentsuObj.tiles.forEach(target => {
-            if (drawnTile && drawnTile.id === target.id) drawnTile = null;
-            else {
+            if (drawnTile && drawnTile.id === target.id) {
+              drawnTile = null;
+            } else {
               let idx = hand.findIndex(t => t.id === target.id);
               if (idx !== -1) hand.splice(idx, 1);
             }
           });
+
           updateHP(healAmount);
-          let newIds = [];
+
+          let newAddedTileIds = [];
           playSE('heal');
           for(let i = 0; i < 3; i++) {
-            if (deck.length > 0) { let t = deck.pop(); hand.push(t); newIds.push(t.id); }
+            if (deck.length > 0) {
+              let t = deck.pop();
+              hand.push(t);
+              newAddedTileIds.push(t.id);
+            }
           }
           sortTiles(hand);
-          if (!drawnTile && deck.length > 0) { drawnTile = deck.pop(); if (drawnTile) newIds.push(drawnTile.id); }
-          render(newIds, []);
-        }, 600);
-      }, 50);
+          
+          if (!drawnTile && deck.length > 0) {
+            drawnTile = deck.pop();
+            if (drawnTile) newAddedTileIds.push(drawnTile.id);
+          }
+
+          render(newAddedTileIds, []);
+          openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！（除外）`, "");
+          setTimeout(() => closeModal(), 1400);
+        }, 700);
+      }, 100);
     }
 
     function onClickKanButton() {
       if (isGameOver) return;
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
+
       let counts = getTileCounts(fullTiles);
       let kanKeys = Object.keys(counts).filter(k => counts[k] === 4);
+
       if (kanKeys.length === 0) return;
-      if (kanKeys.length === 1) execKan(kanKeys[0]);
-      else showKanModal(kanKeys);
+
+      if (kanKeys.length === 1) {
+        execKan(kanKeys[0]);
+      } else {
+        showKanModal(kanKeys);
+      }
     }
 
     function showKanModal(kanKeys) {
-      let html = '<div style="display:flex; gap:6px; flex-direction:column; align-items:center;">';
+      let html = '<div style="display:flex; gap:10px; flex-direction:column; align-items:center;">';
       kanKeys.forEach(key => {
         let [type, valStr] = key.split('_');
         html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
       });
       html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
-      openModal("カンする牌を選択", "", html);
+      openModal("どの牌をカンしますか？", "", html);
     }
 
     function execKan(kanKey) {
       let [type, valStr] = kanKey.split('_');
       let val = parseInt(valStr);
+
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
 
@@ -1155,8 +1391,12 @@
       let healAmount = hasDora ? 500 : 300;
 
       targetTiles.forEach(t => river.push(t));
-      if (drawnTile && drawnTile.type === type && drawnTile.val === val) drawnTile = null;
+
+      if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
+        drawnTile = null;
+      }
       hand = hand.filter(t => !(t.type === type && t.val === val));
+
       kanCount++;
       playSE('heal');
       updateHP(healAmount);
@@ -1168,27 +1408,28 @@
       }
 
       if (kanCount >= 4) {
-        showMessage('流局（四開槓）', 'カンが4回に達しました。', '');
+        showMessage('流局（四開槓）', 'カンが4回行われたため流局となりました。', '');
         isGameOver = true;
         render();
         return;
       }
 
-      openModal("🀄 カン成功！", `HPが ${healAmount} 回復！`, "");
+      openModal("🀄 カン！", `${hasDora ? '🐉 ドラカン！' : ''}HPが ${healAmount} 回復しました！（河へ移動）`, "");
       setTimeout(() => {
         closeModal();
         drawTile();
-        render(drawnTile ? [drawnTile.id] : []);
-      }, 1000);
+        let newId = drawnTile ? [drawnTile.id] : [];
+        render(newId, []);
+      }, 1200);
     }
 
     function triggerRandom10Event() {
       playSE('event');
       let r = Math.random();
       if (r < 0.25) {
-        openModal("😈 災難イベント", "手牌がすべて山札と入れ替わりました！", "");
+        openModal("😈 災難イベント", "手牌がすべて山牌と入れ替わりました！", "<div>手牌リセット！</div>");
         shuffleAllHandTiles();
-        setTimeout(() => { closeModal(); drawTile(); render(); }, 1500);
+        setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
       } else if (r < 0.50) {
         startQuizEvent(() => { drawTile(); render(); }, null);
       } else if (r < 0.75) {
@@ -1198,13 +1439,13 @@
       }
     }
 
-    // リーチ選択（コイントス or 丁と半）
+    // --- 💡 リーチ選択システム（コイントス or 丁半 2回まで） ---
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
       openModal("リーチ試練の選択", "どちらの試練でリーチを賭けますか？", `
-        <div style="display:flex; flex-direction:column; gap:6px; width:100%; max-width:220px; align-items:center;">
-          <button onclick="startCoinTossGame()" style="width:100%;">🪙 コイントス (3回表)</button>
+        <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px; align-items:center;">
+          <button onclick="startCoinTossGame()" style="width:100%;">🪙 コイントス (3回連続表)</button>
           <button onclick="startChohanGame()" style="width:100%;">🎲 丁と半 (2回勝負)</button>
           <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
         </div>
@@ -1214,11 +1455,11 @@
     let coinSuccessCount = 0;
     function startCoinTossGame() {
       coinSuccessCount = 0;
-      openModal("🪙 コイントス試練", "3回連続「表」で成功！失敗で牌が3つ消滅！", `
+      openModal("🪙 コイントス試練", "3回連続【表】を出せば成功！失敗で牌が3つ消滅！", `
         <div id='coin-area'>
           <div class='coin-img'>🪙</div>
-          <button onclick='execCoinToss()' style='margin-top:6px;'>コインを投げる</button>
-          <div style="margin-top:4px;"><button class="btn-cancel" onclick="startRiichiSelect()">戻る</button></div>
+          <button onclick='execCoinToss()' style='margin-top:10px;'>コインを投げる</button>
+          <div><button class="btn-cancel" onclick="startRiichiSelect()" style="margin-top:8px;">戻る</button></div>
         </div>
       `);
     }
@@ -1228,22 +1469,24 @@
       let win = Math.random() < 0.5;
       if (win) {
         coinSuccessCount++;
-        coinArea.innerHTML = `<div class='coin-img'>🪙</div><p style='color:#4db6ac; font-size:11px;'>成功！ (${coinSuccessCount}/3)</p>`;
+        coinArea.innerHTML = `<div class='coin-img'>🪙</div><p style='color:#4db6ac;'>成功！ (${coinSuccessCount}/3)</p>`;
         if (coinSuccessCount >= 3) {
           coinSuccessCount = 0;
           setTimeout(() => {
             closeModal();
             isRiichiSelecting = true;
-            showMessage('立直準備', '切る牌を選択してください。', '');
+            showMessage('立直準備', 'リーチで切る牌を選択してください。', '');
             render();
-          }, 800);
+          }, 1000);
         } else {
-          coinArea.innerHTML += `<button onclick='execCoinToss()' style='margin-top:4px;'>次を投げる</button>`;
+          coinArea.innerHTML += `<button onclick='execCoinToss()' style='margin-top:8px;'>次を投げる</button>`;
         }
       } else {
         coinSuccessCount = 0;
-        coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e53935; font-size:11px;'>失敗！牌が3つ暴発！</p>`;
-        removeRandomTiles(3, () => { setTimeout(() => closeModal(), 800); });
+        coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e53935;'>失敗！ 牌が3つ暴発しました！</p>`;
+        removeRandomTiles(3, () => {
+          setTimeout(() => { closeModal(); }, 800);
+        });
       }
     }
 
@@ -1254,12 +1497,12 @@
     }
 
     function showChohanPrompt() {
-      openModal("🎲 丁と半 試練", `残り挑戦: ${2 - chohanTryCount}回<br>壺の中は「丁（偶数）」か「半（奇数）」か？`, `
-        <div style="display:flex; gap:8px; justify-content:center; margin-top:6px;">
-          <button onclick="execChohan('cho')" style="background:#e53935; padding:6px 12px;">🔴 丁</button>
-          <button onclick="execChohan('han')" style="background:#1e88e5; padding:6px 12px;">🔵 半</button>
+      openModal("🎲 丁と半 試練", `残り挑戦回数: ${2 - chohanTryCount}回<br>壺の中は「丁（偶数）」か「半（奇数）」か？`, `
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+          <button onclick="execChohan('cho')" style="background:#e53935; padding:10px 16px;">🔴 丁 (偶数)</button>
+          <button onclick="execChohan('han')" style="background:#1e88e5; padding:10px 16px;">🔵 半 (奇数)</button>
         </div>
-        <div style="margin-top:6px;"><button class="btn-cancel" onclick="startRiichiSelect()">戻る</button></div>
+        <div style="margin-top:10px;"><button class="btn-cancel" onclick="startRiichiSelect()">戻る</button></div>
       `);
     }
 
@@ -1270,22 +1513,24 @@
       if (playerChoice === actual) {
         chohanTryCount++;
         if (chohanTryCount >= 2) {
-          openModal("✨ 丁と半 クリア！", `出目は ${diceSum}（${actual === 'cho' ? '丁' : '半'}）！2回連続的中！`, "");
+          openModal("✨ 丁と半 クリア！", `出目は ${diceSum}（${actual === 'cho' ? '丁' : '半'}）！2回連続的中しました！`, "");
           setTimeout(() => {
             closeModal();
             isRiichiSelecting = true;
-            showMessage('立直準備', '切る牌を選択してください。', '');
+            showMessage('立直準備', 'リーチで切る牌を選択してください。', '');
             render();
-          }, 1000);
+          }, 1200);
         } else {
-          openModal("⭕ 的中！", `出目は ${diceSum}！あと1回当てろ！`, `
-            <button onclick="showChohanPrompt()" style="margin-top:6px;">次の勝負へ</button>
+          openModal("⭕ 的中！", `出目は ${diceSum} でした！あと1回当てればクリア！`, `
+            <button onclick="showChohanPrompt()" style="margin-top:10px;">次の勝負へ</button>
           `);
         }
       } else {
         chohanTryCount = 0;
-        openModal("❌ 外れ！", `出目は ${diceSum}（${actual === 'cho' ? '丁' : '半'}）！牌が3つ暴発！`, "");
-        removeRandomTiles(3, () => { setTimeout(() => closeModal(), 800); });
+        openModal("❌ 外れ！", `出目は ${diceSum}（${actual === 'cho' ? '丁' : '半'}）でした！牌が3つ暴発します！`, "");
+        removeRandomTiles(3, () => {
+          setTimeout(() => { closeModal(); }, 800);
+        });
       }
     }
 
@@ -1294,25 +1539,29 @@
         isRiichi = false;
         playBGM('normal');
         document.getElementById('riichi-badge').style.display = 'none';
-        showMessage('⚠️ リーチ解除', '試練失敗によりリーチ解除', '');
+        showMessage('⚠️ リーチ解除', 'アガリ試練に失敗したためリーチを解除しました。', '');
       }
-      setTimeout(() => { closeModal(); render(); }, 1200);
+      setTimeout(() => {
+        closeModal();
+        render();
+      }, 1500);
     }
 
     function startAgariSequence() {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
+
       let expectedCount = 14 - (kanCount * 3);
       if (fullTiles.length !== expectedCount) return;
 
       if (!checkWin(fullTiles)) {
         playSE('error');
-        showMessage('❌ チョンボ', 'まだアガリ形ではありません。', '');
+        showMessage('❌ チョンボ', 'まだアガリの形になっていません。', '');
         return;
       }
 
       playSE('event');
-      openModal("和了の試練 (1/3)", "第1試練：弾幕を避けろ！失敗で牌が5個飛んでリーチ解除", "");
+      openModal("上がらせると思ったか？ (1/3)", "第1試練：10秒間弾幕を回避せよ！失敗すると牌が5個飛んでリーチ解除！", "");
       startDodgeGame(() => {
         startQuizEvent(() => {
           startFlashMathEvent(() => {
@@ -1325,25 +1574,29 @@
     async function checkAgariFinal() {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
+
       if (checkWin(fullTiles)) {
         playSE('win');
         let res = evaluateHand(fullTiles, isRiichi);
         let yakuStr = res.yakus.map(y => `${y.name}`).join('・');
-        openModal("🎉 奇跡達成！ 🎉", "おめでとう！生還者として歴史に名を刻もう！", "");
-        showMessage(`🎉 生還！（打牌:${turn}）`, yakuStr, res.scoreText);
+        
+        openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！偉業を称えて名前を刻んでくれ！", "");
+        showMessage(`🎉 生き残れた英雄！（打牌数:${turn}）`, yakuStr, res.scoreText);
         isGameOver = true;
         render();
 
         setTimeout(async () => {
-          let playerName = prompt('おめでとう！生還者として名前を入力してください:', '生還者');
-          if (playerName) await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
-        }, 1000);
+          let playerName = prompt('🎉 おめでとう！君は生き残れた英雄だ！歴史に名を刻むため、名前を入力してください:', '生き残れた英雄');
+          if (playerName) {
+            await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
+          }
+        }, 1200);
       }
     }
 
     function startQuizEvent(onSuccess, onFailure) {
       let q = QUIZ_DB[Math.floor(Math.random() * QUIZ_DB.length)];
-      openModal("🧠 クイズ試練", q.q, `
+      openModal("🧠 突如クイズ！", q.q, `
         <div class="quiz-options">
           <button class="quiz-btn" onclick="checkQuizAns('a', '${q.ans}')">${q.a}</button>
           <button class="quiz-btn" onclick="checkQuizAns('b', '${q.ans}')">${q.b}</button>
@@ -1355,24 +1608,29 @@
 
     function checkQuizAns(userAns, correctAns) {
       if (userAns === correctAns) {
-        openModal("⭕ 正解！", "難を逃れた...", "");
-        setTimeout(() => { closeModal(); window.currentQuizSuccess(); }, 800);
+        openModal("⭕ 正解！", "難を逃れました...", "");
+        setTimeout(() => { closeModal(); window.currentQuizSuccess(); }, 1000);
       } else {
-        openModal("❌ 不正解！", "牌が1つ飛びます！", "");
+        openModal("❌ 不正解！", "失敗しました！（牌が1つ入れ替わります）", "");
         removeRandomTiles(1, () => {
-          if (window.currentQuizFailure) window.currentQuizFailure();
-          else setTimeout(() => closeModal(), 800);
+          if (window.currentQuizFailure) {
+            window.currentQuizFailure();
+          } else {
+            setTimeout(() => { closeModal(); }, 800);
+          }
         });
       }
     }
 
-    function setTouchKey(key, state) { keys[key] = state; }
+    function setTouchKey(key, state) {
+      keys[key] = state;
+    }
 
     function startDodgeGame(onSuccess, onFailure) {
-      openModal("⚡ 回避試練", "5秒後にカウントダウン！ボタンで避けろ！", `
-        <div id="dodge-timer" style="font-size:20px; color:#ffffff; font-weight:bold; margin-bottom:2px;">5</div>
-        <canvas id="dodge-canvas" width="260" height="130"></canvas>
-        <div class="dpad-container" style="margin-top:4px;">
+      openModal("⚡ 回避ゲーム！", "5秒後にカウントダウン！【矢印キー】または下部の【ボタン】で動かして避けろ！", `
+        <div id="dodge-timer" style="font-size:24px; color:#ffffff; font-weight:bold; margin-bottom:4px; text-shadow:0 0 8px #ff5577;">5</div>
+        <canvas id="dodge-canvas" width="300" height="180"></canvas>
+        <div class="dpad-container">
           <div></div>
           <div class="dpad-btn" onmousedown="setTouchKey('ArrowUp', true)" onmouseup="setTouchKey('ArrowUp', false)" ontouchstart="setTouchKey('ArrowUp', true); event.preventDefault();" ontouchend="setTouchKey('ArrowUp', false)">▲</div>
           <div></div>
@@ -1384,12 +1642,17 @@
 
       let count = 5;
       playSE('count_tick');
+
       let timer = setInterval(() => {
         count--;
         let el = document.getElementById('dodge-timer');
         if (el) el.innerText = count;
-        if (count > 0) playSE('count_tick');
-        else if (count === 0) playSE('count_zero');
+
+        if (count > 0) {
+          playSE('count_tick');
+        } else if (count === 0) {
+          playSE('count_zero');
+        }
 
         if (count <= 0) {
           clearInterval(timer);
@@ -1402,17 +1665,23 @@
       const canvas = document.getElementById('dodge-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let px = 120, py = 55, pSize = 12;
+
+      let px = 140, py = 80, pSize = 14;
       let bullets = [];
-      let duration = 8.0;
+      let duration = 10.0;
       let gameActive = true;
 
       const keyHandler = (e) => { keys[e.key] = e.type === 'keydown'; };
       window.addEventListener('keydown', keyHandler);
       window.addEventListener('keyup', keyHandler);
 
-      for(let i = 0; i < 12; i++) {
-        bullets.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 1.6, vy: (Math.random() - 0.5) * 1.6 });
+      for(let i = 0; i < 15; i++) {
+        bullets.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 1.8,
+          vy: (Math.random() - 0.5) * 1.8
+        });
       }
 
       let lastTime = performance.now();
@@ -1433,6 +1702,7 @@
 
         ctx.fillStyle = '#11080c';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         ctx.strokeStyle = '#ff88aa';
         ctx.lineWidth = 2;
         ctx.strokeRect(px, py, pSize, pSize);
@@ -1442,17 +1712,23 @@
           b.x += b.vx; b.y += b.vy;
           if (b.x < 0 || b.x > canvas.width) b.vx *= -1;
           if (b.y < 0 || b.y > canvas.height) b.vy *= -1;
-          ctx.beginPath(); ctx.arc(b.x, b.y, 3.5, 0, Math.PI * 2); ctx.fill();
 
-          if (px < b.x + 3.5 && px + pSize > b.x - 3.5 && py < b.y + 3.5 && py + pSize > b.y - 3.5) {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (px < b.x + 4 && px + pSize > b.x - 4 && py < b.y + 4 && py + pSize > b.y - 4) {
             gameActive = false;
             window.removeEventListener('keydown', keyHandler);
             window.removeEventListener('keyup', keyHandler);
             keys = {};
-            openModal("💥 被弾！", "牌が5個飛びます！", "");
+            openModal("💥 被弾！", "失敗しました！（牌が5個飛びます）", "");
             removeRandomTiles(5, () => {
-              if (onFailure) onFailure();
-              else setTimeout(() => closeModal(), 800);
+              if (onFailure) {
+                onFailure();
+              } else {
+                setTimeout(() => { closeModal(); }, 800);
+              }
             });
             return;
           }
@@ -1463,10 +1739,11 @@
           window.removeEventListener('keydown', keyHandler);
           window.removeEventListener('keyup', keyHandler);
           keys = {};
-          openModal("✨ 回避成功！", "見事に避け切った！", "");
-          setTimeout(() => { closeModal(); onSuccess(); }, 800);
+          openModal("✨ 回避成功！", "見事に避け切りました！", "");
+          setTimeout(() => { closeModal(); onSuccess(); }, 1000);
           return;
         }
+
         requestAnimationFrame(loop);
       }
       requestAnimationFrame(loop);
@@ -1474,7 +1751,8 @@
 
     function startFlashMathEvent(onSuccess, onFailure) {
       if (flashCountdownTimer) clearInterval(flashCountdownTimer);
-      openModal("⚡ フラッシュ暗算", "数字の合計を答えろ！", "<div id='flash-box' class='flash-num'>READY</div>");
+
+      openModal("⚡ フラッシュ暗算", "表示される5個の1桁の数字の合計を答えろ！", "<div id='flash-box' class='flash-num'>READY...</div>");
 
       let numbers = [];
       for(let i=0; i<5; i++) numbers.push(Math.floor(Math.random()*9)+1);
@@ -1488,36 +1766,71 @@
             if (box) {
               playSE('flash_tick');
               box.innerText = numbers[idx];
+              box.classList.remove('pop');
+              void box.offsetWidth;
+              box.classList.add('pop');
             }
             idx++;
           } else {
             clearInterval(interval);
+            
+            let limitTime = 5;
             if (box) {
               box.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
-                  <input type="number" id="flash-ans" class="flash-input" placeholder="合計" autofocus>
-                  <button onclick="checkFlashAns(${sum})" style="padding:3px 8px; font-size:10px;">回答</button>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                  <div id="flash-timer-display" style="font-size:13px; color:#ff7799; font-weight:bold;">回答制限時間: 5.0秒</div>
+                  <div style="display:flex; align-items:center;">
+                    <input type="number" id="flash-ans" class="flash-input" placeholder="合計" autofocus>
+                    <button onclick="checkFlashAns(${sum})" style="margin-left:4px;">回答</button>
+                  </div>
                 </div>
               `;
             }
+
             window.currentFlashSuccess = onSuccess;
             window.currentFlashFailure = onFailure;
+
+            let startTime = performance.now();
+            flashCountdownTimer = setInterval(() => {
+              let elapsed = (performance.now() - startTime) / 1000;
+              let remain = Math.max(0, limitTime - elapsed);
+              let timerEl = document.getElementById('flash-timer-display');
+              if (timerEl) timerEl.innerText = `回答制限時間: ${remain.toFixed(1)}秒`;
+
+              if (remain <= 0) {
+                clearInterval(flashCountdownTimer);
+                openModal("⏱️ タイムオーバー！", "5秒以内に回答できませんでした！", "");
+                removeRandomTiles(5, () => {
+                  if (window.currentFlashFailure) {
+                    window.currentFlashFailure();
+                  } else {
+                    setTimeout(() => { closeModal(); }, 800);
+                  }
+                });
+              }
+            }, 100);
           }
-        }, 500);
-      }, 800);
+        }, 600);
+      }, 1000);
     }
 
     function checkFlashAns(correctSum) {
+      if (flashCountdownTimer) clearInterval(flashCountdownTimer);
+
       let inputEl = document.getElementById('flash-ans');
       let val = inputEl ? parseInt(inputEl.value) : NaN;
+
       if (val === correctSum) {
-        openModal("⭕ 正解！", "", "");
-        setTimeout(() => { closeModal(); window.currentFlashSuccess(); }, 800);
+        openModal("⭕ 正解！", "見事な計算力です！", "");
+        setTimeout(() => { closeModal(); window.currentFlashSuccess(); }, 1000);
       } else {
-        openModal("❌ 不正解！", `牌が5個飛びます`, "");
+        openModal("❌ 不正解！", `正解は ${correctSum} でした！（牌が5個入れ替わります）`, "");
         removeRandomTiles(5, () => {
-          if (window.currentFlashFailure) window.currentFlashFailure();
-          else setTimeout(() => closeModal(), 800);
+          if (window.currentFlashFailure) {
+            window.currentFlashFailure();
+          } else {
+            setTimeout(() => { closeModal(); }, 800);
+          }
         });
       }
     }
@@ -1528,7 +1841,6 @@
       document.getElementById('modal-content').innerHTML = contentHtml;
       document.getElementById('game-modal').style.display = 'flex';
     }
-
     function closeModal() {
       if (flashCountdownTimer) clearInterval(flashCountdownTimer);
       document.getElementById('game-modal').style.display = 'none';
@@ -1537,35 +1849,50 @@
     function getTenpaiDiscards(hand13, currentDrawn) {
       const fullTiles = [...hand13];
       if (currentDrawn) fullTiles.push(currentDrawn);
-      let valid = [];
+
+      let validDiscardIndices = [];
       for (let i = 0; i < fullTiles.length; i++) {
         let temp13 = fullTiles.filter((_, idx) => idx !== i);
-        if (checkTenpai(temp13).length > 0) valid.push(i);
+        if (checkTenpai(temp13).length > 0) validDiscardIndices.push(i);
       }
-      return valid;
+      return validDiscardIndices;
     }
 
     function checkTenpai(handTiles) {
-      const all = [];
-      ['m', 'p', 's'].forEach(s => { for(let n=1; n<=9; n++) all.push({type:s, val:n}); });
-      for(let n=1; n<=7; n++) all.push({type:'z', val:n});
-      let waits = [];
-      for (let tile of all) {
-        if (checkWin([...handTiles, tile])) waits.push(tile);
+      const allPossibleTiles = [];
+      ['m', 'p', 's'].forEach(s => { for(let n=1; n<=9; n++) allPossibleTiles.push({type:s, val:n}); });
+      for(let n=1; n<=7; n++) allPossibleTiles.push({type:'z', val:n});
+
+      let waitingTiles = [];
+      for (let tile of allPossibleTiles) {
+        if (checkWin([...handTiles, tile])) {
+          waitingTiles.push(tile);
+        }
       }
-      return waits;
+      return waitingTiles;
     }
 
     function checkWin(tiles) {
       let counts = getTileCounts(tiles);
+
       if (kanCount === 0) {
-        let pair = 0, chitoi = true;
+        let pairCount = 0, isChitoi = true;
         for (let k in counts) {
-          if (counts[k] === 2) pair++;
-          else if (counts[k] !== 0) chitoi = false;
+          if (counts[k] === 2) pairCount++;
+          else if (counts[k] !== 0) isChitoi = false;
         }
-        if (chitoi && pair === 7) return true;
+        if (isChitoi && pairCount === 7) return true;
       }
+
+      if (kanCount === 0) {
+        let yaochuTypes = 0, hasPair = false;
+        for (let k of YAOCHU_KEYS) {
+          if (counts[k] >= 1) yaochuTypes++;
+          if (counts[k] === 2) hasPair = true;
+        }
+        if (yaochuTypes === 13 && hasPair && Object.keys(counts).every(k => YAOCHU_KEYS.includes(k) ? counts[k] <= 2 : counts[k] === 0)) return true;
+      }
+
       for (let k in counts) {
         if (counts[k] >= 2) {
           counts[k] -= 2;
@@ -1580,6 +1907,7 @@
       let remKey = Object.keys(counts).find(k => counts[k] > 0);
       if (!remKey) return true;
       let [type, valStr] = remKey.split('_'), val = parseInt(valStr);
+
       if (counts[remKey] >= 3) {
         counts[remKey] -= 3;
         if (checkMentsu(counts)) return true;
@@ -1607,59 +1935,153 @@
 
     function evaluateHand(tiles, isRiichiActive) {
       let counts = getTileCounts(tiles);
-      let yakus = [{ name: '門前清自摸和', han: 1 }];
+      let yakus = [];
+
+      if (kanCount === 0) {
+        let yaochuTypes = 0, hasPair = false, kokushiPairKey = null;
+        for (let k of YAOCHU_KEYS) {
+          if (counts[k] >= 1) yaochuTypes++;
+          if (counts[k] === 2) { hasPair = true; kokushiPairKey = k; }
+        }
+        if (yaochuTypes === 13 && hasPair) {
+          if (drawnTile && `${drawnTile.type}_${drawnTile.val}` === kokushiPairKey) {
+            yakus.push({ name: '国士無双十三面待ち', han: 26, isDouble: true });
+          } else {
+            yakus.push({ name: '国士無双', han: 13 });
+          }
+        }
+      }
+
+      if (counts['z_5'] >= 3 && counts['z_6'] >= 3 && counts['z_7'] >= 3) yakus.push({ name: '大三元', han: 13 });
+      if (Object.keys(counts).every(k => k.startsWith('z') || counts[k] === 0)) yakus.push({ name: '字一色', han: 13 });
+
+      if (yakus.length > 0) {
+        let doubleCount = 0;
+        yakus.forEach(y => { doubleCount += (y.isDouble ? 2 : 1); });
+        let rawScore = 32000 * doubleCount;
+        let scoreText = doubleCount > 1 ? `${doubleCount}倍役満 ${rawScore}点` : `役満 32000点`;
+        return { yakus, rawScore, scoreText };
+      }
+
+      yakus.push({ name: '門前清自摸和', han: 1 });
       if (isRiichiActive) yakus.push({ name: '立直', han: 1 });
+
+      if (kanCount === 0) {
+        let pairCount = 0;
+        for (let k in counts) if (counts[k] === 2) pairCount++;
+        if (pairCount === 7) yakus.push({ name: '七対子', han: 2 });
+      }
+
       if (Object.keys(counts).every(k => !YAOCHU_KEYS.includes(k) || counts[k] === 0)) yakus.push({ name: '断幺九', han: 1 });
 
-      let doraCount = 0, akaCount = 0;
+      let doraCount = 0, akaDoraCount = 0;
       tiles.forEach(t => {
-        actualDoraTiles.forEach(dt => { if (t.type === dt.type && t.val === dt.val) doraCount++; });
-        if (t.isAka) akaCount++;
+        actualDoraTiles.forEach(dt => {
+          if (t.type === dt.type && t.val === dt.val) doraCount++;
+        });
+        if (t.isAka) akaDoraCount++;
       });
-      if (doraCount > 0) yakus.push({ name: `ドラ ${doraCount}`, han: doraCount });
-      if (akaCount > 0) yakus.push({ name: `赤ドラ ${akaCount}`, han: akaCount });
 
-      let totalHan = yakus.reduce((s, y) => s + y.han, 0);
-      let { rawScore, scoreText } = calculateScore(totalHan, 30);
-      return { yakus, rawScore, scoreText };
+      if (doraCount > 0) yakus.push({ name: `ドラ ${doraCount}`, han: doraCount });
+      if (akaDoraCount > 0) yakus.push({ name: `赤ドラ ${akaDoraCount}`, han: akaDoraCount });
+
+      let totalHan = yakus.reduce((sum, y) => sum + y.han, 0);
+      let fu = (kanCount === 0 && yakus.some(y => y.name === '七対子')) ? 25 : 30;
+
+      let { rawScore, scoreText } = calculateScore(totalHan, fu);
+
+      return { yakus, totalHan, fu, rawScore, scoreText };
     }
 
     function calculateScore(han, fu) {
-      let rawScore = 3000, text = `親 3000点 (${han}翻)`;
-      if (han >= 5) { rawScore = 12000; text = `親満貫 12000点 (${han}翻)`; }
+      let rawScore = 0, text = '';
+      if (han >= 13) { rawScore = 32000; text = `役満 32000点 (${han}翻)`; }
+      else if (han >= 11) { rawScore = 24000; text = `三倍満 24000点 (${han}翻)`; }
+      else if (han >= 8)  { rawScore = 16000; text = `倍満 16000点 (${han}翻)`; }
+      else if (han >= 6)  { rawScore = 12000; text = `跳満 12000点 (${han}翻)`; }
+      else if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+        rawScore = 12000; text = `親満貫 12000点 (${han}翻${fu}符)`;
+      } else {
+        let basePoint = fu * Math.pow(2, han + 2);
+        rawScore = Math.ceil((basePoint * 6) / 100) * 100;
+        text = `親 ${rawScore}点 [${han}翻${fu}符]`;
+      }
       return { rawScore, scoreText: text };
     }
 
     async function saveGlobalScore(playerName, turnNum, remHp, scoreVal, scoreText, yakuText) {
-      if (!supabaseClient) return;
+      document.getElementById('msg-error').innerText = '';
+      if (!supabaseClient) {
+        document.getElementById('msg-error').innerText = '⚠️ Supabase接続設定がされていません。';
+        return;
+      }
+
       let calcPoint = Math.round((scoreVal * remHp) / Math.max(1, turnNum));
-      await supabaseClient.from('impossible_mahjong_scores').insert([{
-        player_name: playerName, turn_count: turnNum, remaining_hp: remHp,
-        score_val: scoreVal, score_text: scoreText, yaku_text: yakuText, calc_point: calcPoint
-      }]);
-      fetchGlobalRanking();
+
+      const { data, error } = await supabaseClient
+        .from('impossible_mahjong_scores')
+        .insert([{
+          player_name: playerName,
+          turn_count: turnNum,
+          remaining_hp: remHp,
+          score_val: scoreVal,
+          score_text: scoreText,
+          yaku_text: yakuText,
+          calc_point: calcPoint
+        }]);
+
+      if (error) {
+        console.error('送信エラー詳細:', error);
+        document.getElementById('msg-error').innerText = `⚠️ ランキング保存エラー: ${error.message}`;
+      } else {
+        fetchGlobalRanking();
+      }
     }
 
     async function fetchGlobalRanking() {
       const listEl = document.getElementById('ranking-list');
-      if (!supabaseClient) { listEl.innerHTML = '<li class="ranking-item">設定エラー</li>'; return; }
-      const { data } = await supabaseClient.from('impossible_mahjong_scores').select('*').order('calc_point', { ascending: false }).limit(10);
+      if (!supabaseClient) {
+        listEl.innerHTML = '<li class="ranking-item" style="text-align:center;">API設定エラー</li>';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('impossible_mahjong_scores')
+        .select('*')
+        .order('calc_point', { ascending: false });
+
+      if (error) {
+        console.error('取得エラー:', error);
+        listEl.innerHTML = `<li class="ranking-item" style="text-align:center;">取得失敗</li>`;
+        return;
+      }
+
       listEl.innerHTML = '';
-      if (!data || data.length === 0) { listEl.innerHTML = '<li class="ranking-item">記録なし</li>'; return; }
+      if (!data || data.length === 0) {
+        listEl.innerHTML = '<li class="ranking-item" style="text-align:center;">生存者の記録がありません</li>';
+        return;
+      }
+
       data.forEach((item, idx) => {
         const li = document.createElement('li');
         li.className = 'ranking-item';
         li.innerHTML = `
-          <div class="rank-head"><span>#${idx+1} HP:${item.remaining_hp}</span><span>${item.turn_count}打</span></div>
-          <div class="rank-player">${escapeHTML(item.player_name)}</div>
+          <div class="rank-head">
+            <span>第${idx + 1}位: 残HP ${item.remaining_hp}</span>
+            <span>打牌:${item.turn_count}回</span>
+          </div>
+          <div class="rank-player">👤 ${escapeHTML(item.player_name)} (${item.calc_point} pt)</div>
           <div class="rank-detail">${item.score_text}</div>
+          <div class="rank-detail" style="color: #ff5577;">役: ${escapeHTML(item.yaku_text)}</div>
         `;
         listEl.appendChild(li);
       });
     }
 
     function escapeHTML(str) {
-      return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
     }
 
     function render(newAddedIds = [], destroyIds = []) {
@@ -1668,10 +2090,13 @@
 
       const doraEl = document.getElementById('dora-tile-container');
       doraEl.innerHTML = '';
-      doraIndicators.forEach(dInd => doraEl.appendChild(createTileElement(dInd, null, true)));
+      doraIndicators.forEach(dInd => {
+        doraEl.appendChild(createTileElement(dInd, null, true));
+      });
 
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
+
       let expectedCount = 14 - (kanCount * 3);
 
       const waitsContainer = document.getElementById('waits-container');
@@ -1680,7 +2105,9 @@
         let currentHandTiles = fullTiles.length === expectedCount ? hand : fullTiles;
         let waits = checkTenpai(currentHandTiles);
         if (waits.length > 0) {
-          waits.forEach(wTile => waitsContainer.appendChild(createTileElement(wTile, null, true)));
+          waits.forEach(wTile => {
+            waitsContainer.appendChild(createTileElement(wTile, null, true));
+          });
         } else {
           waitsContainer.innerText = 'ノーテン';
         }
@@ -1691,12 +2118,23 @@
       if (!isGameOver && availableMentsu.length > 0) {
         btnSacrifice.style.display = 'inline-block';
         let coolDown = 5 - (turn - lastSacrificeTurn);
-        if (coolDown <= 0) { btnSacrifice.disabled = false; btnSacrifice.innerText = '面子回復'; }
-        else { btnSacrifice.disabled = true; btnSacrifice.innerText = `回復(${coolDown})`; }
-      } else { btnSacrifice.style.display = 'none'; }
+        if (coolDown <= 0) {
+          btnSacrifice.disabled = false;
+          btnSacrifice.innerText = '面子捧げて回復';
+        } else {
+          btnSacrifice.disabled = true;
+          btnSacrifice.innerText = `回復(残り${coolDown}ターン)`;
+        }
+      } else {
+        btnSacrifice.style.display = 'none';
+      }
 
       const btnKyushu = document.getElementById('btn-kyushu');
-      btnKyushu.style.display = (!isGameOver && countYaochuTypes(fullTiles) >= 9) ? 'inline-block' : 'none';
+      if (!isGameOver && countYaochuTypes(fullTiles) >= 9) {
+        btnKyushu.style.display = 'inline-block';
+      } else {
+        btnKyushu.style.display = 'none';
+      }
 
       const btnKan = document.getElementById('btn-kan');
       let tileCounts = getTileCounts(fullTiles);
@@ -1704,31 +2142,51 @@
       btnKan.style.display = (canKan && !isGameOver) ? 'inline-block' : 'none';
 
       const btnWin = document.getElementById('btn-win');
-      if (fullTiles.length === expectedCount && checkWin(fullTiles) && !isGameOver) btnWin.classList.add('btn-win-glow');
-      else btnWin.classList.remove('btn-win-glow');
+      if (fullTiles.length === expectedCount && checkWin(fullTiles) && !isGameOver) {
+        btnWin.classList.add('btn-win-glow');
+      } else {
+        btnWin.classList.remove('btn-win-glow');
+      }
 
-      let riichiIndices = (!isRiichi && !isGameOver && fullTiles.length === expectedCount) ? getTenpaiDiscards(hand, drawnTile) : [];
+      let riichiDiscardIndices = [];
+      if (!isRiichi && !isGameOver && fullTiles.length === expectedCount) {
+        riichiDiscardIndices = getTenpaiDiscards(hand, drawnTile);
+      }
+
       const btnRiichi = document.getElementById('btn-riichi');
-      if (!isRiichi && riichiIndices.length > 0 && !isRiichiSelecting) btnRiichi.disabled = false;
-      else if (!isRiichiSelecting) btnRiichi.disabled = true;
+      if (!isRiichi && riichiDiscardIndices.length > 0 && !isRiichiSelecting) {
+        btnRiichi.disabled = false;
+      } else if (!isRiichiSelecting) {
+        btnRiichi.disabled = true;
+      }
 
       const handEl = document.getElementById('hand');
       handEl.innerHTML = '';
       hand.forEach((tile, idx) => {
-        let isTarget = isRiichiSelecting && riichiIndices.includes(idx);
-        handEl.appendChild(createTileElement(tile, () => handleTileClick(idx, false), false, isTarget, newAddedIds.includes(tile.id), destroyIds.includes(tile.id)));
+        let isTarget = isRiichiSelecting && riichiDiscardIndices.includes(idx);
+        let isNew = newAddedIds.includes(tile.id);
+        let isDestroy = destroyIds.includes(tile.id);
+
+        let el = createTileElement(tile, () => handleTileClick(idx, false), false, isTarget, isNew, isDestroy);
+        handEl.appendChild(el);
       });
 
       const drawnEl = document.getElementById('drawn-tile');
       drawnEl.innerHTML = '';
       if (drawnTile) {
-        let isTarget = isRiichiSelecting && riichiIndices.includes(hand.length);
-        drawnEl.appendChild(createTileElement(drawnTile, () => handleTileClick(null, true), false, isTarget, newAddedIds.includes(drawnTile.id), destroyIds.includes(drawnTile.id)));
+        let isTarget = isRiichiSelecting && riichiDiscardIndices.includes(hand.length);
+        let isNew = newAddedIds.includes(drawnTile.id);
+        let isDestroy = destroyIds.includes(drawnTile.id);
+
+        let el = createTileElement(drawnTile, () => handleTileClick(null, true), false, isTarget, isNew, isDestroy);
+        drawnEl.appendChild(el);
       }
 
       const riverEl = document.getElementById('river');
       riverEl.innerHTML = '';
-      river.forEach(tile => riverEl.appendChild(createTileElement(tile, null, true)));
+      river.forEach(tile => {
+        riverEl.appendChild(createTileElement(tile, null, true));
+      });
     }
 
     function handleTileClick(index, isDrawn) {
@@ -1741,13 +2199,21 @@
       const el = document.createElement('div');
       el.className = 'tile';
       el.dataset.id = tile.id || 0;
+
       if (isSmall) el.classList.add('small');
       if (isRiichiTarget) el.classList.add('riichi-target');
       if (tile.isAka) el.classList.add('aka-dora');
-      if (isDestroy) el.classList.add('destroying');
-      if (isNew) { el.classList.add('slide-in'); el.classList.add('new-drawn'); }
 
-      let colorClass = 'black', displayText = '', typeText = '';
+      if (isDestroy) el.classList.add('destroying');
+      if (isNew) {
+        el.classList.add('slide-in');
+        el.classList.add('new-drawn');
+        setTimeout(() => el.classList.remove('new-drawn'), 2000);
+      }
+
+      let colorClass = 'black';
+      let displayText = '', typeText = '';
+
       if (tile.type === 'z') {
         displayText = HONORS[tile.val - 1];
         if (tile.val === 6) colorClass = 'green';
@@ -1758,8 +2224,10 @@
         if (tile.type === 'm') colorClass = 'red';
         if (tile.type === 's') colorClass = 'green';
       }
+
       el.classList.add(colorClass);
       el.innerHTML = `<span class="tile-num">${displayText}</span>${typeText ? `<span class="tile-type">${typeText}</span>` : ''}`;
+
       if (onClick) el.addEventListener('click', onClick);
       return el;
     }
@@ -1770,7 +2238,10 @@
       document.getElementById('msg-score').innerText = score;
     }
 
-    function clearMessages() { showMessage('', '', ''); document.getElementById('msg-error').innerText = ''; }
+    function clearMessages() { 
+      showMessage('', '', '');
+      document.getElementById('msg-error').innerText = '';
+    }
 
     initGame();
   </script>
