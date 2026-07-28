@@ -418,7 +418,7 @@
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 245, 247, 0.92);
+      background: rgba(30, 20, 25, 0.95); /* ★ 視認性向上のため背景を少し暗めに調整 */
       border-radius: 18px;
       display: flex;
       flex-direction: column;
@@ -430,16 +430,28 @@
       text-align: center;
     }
     body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.95); }
-    .modal-title { font-size: 18px; font-weight: bold; color: #ff5577; }
-    body.death-mode .modal-title { color: #ff0000; }
-    .modal-desc { font-size: 13px; color: #776670; margin-bottom: 5px; }
+    /* ★ モーダルタイトルを読みやすいクッキリした白文字に変更 */
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px #ff7799;
+    }
+    body.death-mode .modal-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    .modal-desc {
+      font-size: 13px;
+      color: #ffe6ec;
+      margin-bottom: 5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
     body.death-mode .modal-desc { color: #cccccc; }
 
     #dodge-canvas {
-      background: #22111a;
+      background: #11080c;
       border: 3px solid #ff88aa;
       border-radius: 10px;
       max-width: 100%;
+      box-shadow: 0 0 15px rgba(255, 136, 170, 0.3);
     }
 
     /* スマホ用 十字キーUIスタイル */
@@ -476,7 +488,7 @@
     .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     .quiz-btn:hover { background: #ffe6ec; }
     
-    .flash-num { font-size: 64px; font-weight: bold; color: #ff5577; text-shadow: 0 0 10px #ffe6ec; height: 80px; }
+    .flash-num { font-size: 64px; font-weight: bold; color: #ffffff; text-shadow: 0 0 15px #ff7799; height: 80px; }
     .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
 
     .coin-img { font-size: 50px; transition: transform 0.5s; }
@@ -502,19 +514,20 @@
 
   <h1>🌸 ふわふわ麻雀 🌸</h1>
 
-  <!-- ★ 折りたたみルール表記（クリック/タップで開閉） -->
+  <!-- 折りたたみルール表記（クリック/タップで開閉） -->
   <details class="rules-details">
     <summary class="rules-summary">📜 全体ルールを見る（タップで開閉）</summary>
     <div class="rules-content">
       <ul>
         <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
-        <li><b>ドラDiscardのペナルティ</b>: ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
+        <li><b>ドラDiscardのペナルティ</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
         <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
         <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
         <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
         <li><b>九種九牌</b>: 一九字牌が9種以上あればボタン出現。全牌を山札に戻して引き直し。</li>
         <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
-        <li><b>アガリの難関</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！</li>
+        <li><b>アガリの難関＆リーチ解除</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>失敗するとリーチが解除</b>されます。</li>
       </ul>
     </div>
   </details>
@@ -870,7 +883,8 @@
       river.push(discarded);
       playSE('discard');
 
-      if (!isFree) {
+      // リーチ成立中は打牌によるHP減少をストップ！
+      if (!isFree && !isRiichi) {
         let dmg = isTileDora(discarded) ? -100 : -50;
         updateHP(dmg);
         if (isGameOver) { render(); return; }
@@ -1138,11 +1152,11 @@
         shuffleAllHandTiles();
         setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
       } else if (r < 0.50) {
-        startQuizEvent(() => { drawTile(); render(); });
+        startQuizEvent(() => { drawTile(); render(); }, () => { cancelRiichiAndContinue(); });
       } else if (r < 0.75) {
-        startDodgeGame(() => { drawTile(); render(); });
+        startDodgeGame(() => { drawTile(); render(); }, () => { cancelRiichiAndContinue(); });
       } else {
-        startFlashMathEvent(() => { drawTile(); render(); });
+        startFlashMathEvent(() => { drawTile(); render(); }, () => { cancelRiichiAndContinue(); });
       }
     }
 
@@ -1184,6 +1198,19 @@
       }
     }
 
+    // 試練失敗時のリーチ解除処理
+    function cancelRiichiAndContinue() {
+      if (isRiichi) {
+        isRiichi = false;
+        document.getElementById('riichi-badge').style.display = 'none';
+        showMessage('⚠️ リーチ解除', '上がれなかったためリーチを解除しました。', '');
+      }
+      setTimeout(() => {
+        closeModal();
+        render();
+      }, 1500);
+    }
+
     function startAgariSequence() {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
@@ -1198,14 +1225,14 @@
       }
 
       playSE('event');
-      openModal("上がらせると思ったか？ (1/3)", "第1試練：10秒間弾幕を回避せよ！失敗すると牌が5個飛ぶ！", "");
+      openModal("上がらせると思ったか？ (1/3)", "第1試練：10秒間弾幕を回避せよ！失敗すると牌が5個飛んでリーチ解除！", "");
       startDodgeGame(() => {
         startQuizEvent(() => {
           startFlashMathEvent(() => {
             checkAgariFinal();
-          });
-        });
-      });
+          }, cancelRiichiAndContinue);
+        }, cancelRiichiAndContinue);
+      }, cancelRiichiAndContinue);
     }
 
     async function checkAgariFinal() {
@@ -1217,18 +1244,22 @@
         let res = evaluateHand(fullTiles, isRiichi);
         let yakuStr = res.yakus.map(y => `${y.name}`).join('・');
         
-        showMessage(`🎉 奇跡のツモアガリ！（打牌数:${turn}）`, yakuStr, res.scoreText);
+        // ★ クリア時の称賛メッセージ！
+        openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！偉業を称えて名前を刻んでくれ！", "");
+        showMessage(`🎉 生き残れた英雄！（打牌数:${turn}）`, yakuStr, res.scoreText);
         isGameOver = true;
         render();
 
-        let playerName = prompt('🎉 理不尽を乗り越えました！ランキングに登録する名前を入力してください:', 'ふわふわ生存者');
-        if (playerName) {
-          await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
-        }
+        setTimeout(async () => {
+          let playerName = prompt('🎉 おめでとう！君は生き残れた英雄だ！歴史に名を刻むため、名前を入力してください:', '生き残れた英雄');
+          if (playerName) {
+            await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
+          }
+        }, 1200);
       }
     }
 
-    function startQuizEvent(onSuccess) {
+    function startQuizEvent(onSuccess, onFailure) {
       let q = QUIZ_DB[Math.floor(Math.random() * QUIZ_DB.length)];
       openModal("🧠 突如クイズ！", q.q, `
         <div class="quiz-options">
@@ -1237,6 +1268,7 @@
         </div>
       `);
       window.currentQuizSuccess = onSuccess;
+      window.currentQuizFailure = onFailure;
     }
 
     function checkQuizAns(userAns, correctAns) {
@@ -1244,9 +1276,13 @@
         openModal("⭕ 正解！", "難を逃れました...", "");
         setTimeout(() => { closeModal(); window.currentQuizSuccess(); }, 1000);
       } else {
-        openModal("❌ 不正解！", "罰として牌が1つランダムで入れ替わります！再度クイズ！", "");
+        openModal("❌ 不正解！", "上がれなかったためリーチを解除しました！（牌が1つ入れ替わります）", "");
         removeRandomTiles(1);
-        setTimeout(() => { startQuizEvent(window.currentQuizSuccess); }, 1200);
+        if (window.currentQuizFailure) {
+          window.currentQuizFailure();
+        } else {
+          setTimeout(() => { closeModal(); render(); }, 1500);
+        }
       }
     }
 
@@ -1254,9 +1290,9 @@
       keys[key] = state;
     }
 
-    function startDodgeGame(onSuccess) {
+    function startDodgeGame(onSuccess, onFailure) {
       openModal("⚡ 回避ゲーム！", "5秒後に開始！【矢印キー】または下部の【ボタン】で動かして避けろ！", `
-        <div id="dodge-timer" style="font-size:20px; color:#ff5577; font-weight:bold; margin-bottom:5px;">5</div>
+        <div id="dodge-timer" style="font-size:22px; color:#ffffff; font-weight:bold; margin-bottom:5px; text-shadow:0 0 8px #ff5577;">5</div>
         <canvas id="dodge-canvas" width="360" height="240"></canvas>
         <div class="dpad-container">
           <div></div>
@@ -1275,12 +1311,12 @@
         if (el) el.innerText = count;
         if (count <= 0) {
           clearInterval(timer);
-          runDodgeEngine(onSuccess);
+          runDodgeEngine(onSuccess, onFailure);
         }
       }, 1000);
     }
 
-    function runDodgeEngine(onSuccess) {
+    function runDodgeEngine(onSuccess, onFailure) {
       const canvas = document.getElementById('dodge-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -1319,7 +1355,7 @@
         if (keys['ArrowLeft'] && px > 0) px -= speed;
         if (keys['ArrowRight'] && px < canvas.width - pSize) px += speed;
 
-        ctx.fillStyle = '#22111a';
+        ctx.fillStyle = '#11080c';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.strokeStyle = '#ff88aa';
@@ -1341,9 +1377,13 @@
             window.removeEventListener('keydown', keyHandler);
             window.removeEventListener('keyup', keyHandler);
             keys = {};
-            openModal("💥 被弾！", "回避失敗！罰として牌が5個飛びました！", "");
+            openModal("💥 被弾！", "上がれなかったためリーチを解除しました！（牌が5個飛びます）", "");
             removeRandomTiles(5);
-            setTimeout(() => { closeModal(); render(); }, 1500);
+            if (onFailure) {
+              onFailure();
+            } else {
+              setTimeout(() => { closeModal(); render(); }, 1500);
+            }
             return;
           }
         }
@@ -1363,7 +1403,7 @@
       requestAnimationFrame(loop);
     }
 
-    function startFlashMathEvent(onSuccess) {
+    function startFlashMathEvent(onSuccess, onFailure) {
       openModal("⚡ フラッシュ暗算", "表示される5個の1桁の数字の合計を答えろ！", "<div id='flash-box' class='flash-num'>READY...</div>");
 
       let numbers = [];
@@ -1384,6 +1424,7 @@
               <button onclick="checkFlashAns(${sum})" style="margin-left:5px;">回答</button>
             `;
             window.currentFlashSuccess = onSuccess;
+            window.currentFlashFailure = onFailure;
           }
         }, 600);
       }, 1000);
@@ -1395,9 +1436,13 @@
         openModal("⭕ 正解！", "見事な計算力です！", "");
         setTimeout(() => { closeModal(); window.currentFlashSuccess(); }, 1000);
       } else {
-        openModal("❌ 不正解！", `正解は ${correctSum} でした！罰として牌が5個入れ替わります！`, "");
+        openModal("❌ 不正解！", `正解は ${correctSum} でした！上がれなかったためリーチを解除しました！（牌が5個入れ替わります）`, "");
         removeRandomTiles(5);
-        setTimeout(() => { closeModal(); render(); }, 1500);
+        if (window.currentFlashFailure) {
+          window.currentFlashFailure();
+        } else {
+          setTimeout(() => { closeModal(); render(); }, 1500);
+        }
       }
     }
 
