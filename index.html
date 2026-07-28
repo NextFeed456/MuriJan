@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>クリアは無理な麻雀</title>
+  <title>ふわふわ麻雀🌸</title>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -11,58 +11,108 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
+    
+    /* ゆるふわベースのスタイル */
     body {
-      background-color: #1a0000;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #fff5f7;
+      color: #5a4048;
+      font-family: 'Hiragino Sans', 'ヒラギノ角ゴ ProN', 'Meiryo', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       margin: 0;
       padding: 10px;
+      transition: background-color 0.8s ease;
     }
+
+    /* 💀 HP0時のガチデス感スタイル（bodyにクラス追加） */
+    body.death-mode {
+      background-color: #0d0000 !important;
+      color: #ff3333 !important;
+      animation: deathShake 0.5s ease-in-out;
+    }
+    @keyframes deathShake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-10px, 10px); }
+      40% { transform: translate(10px, -10px); }
+      60% { transform: translate(-8px, -5px); }
+      80% { transform: translate(8px, 5px); }
+    }
+
     h1 {
-      margin: 5px 0 10px 0;
+      margin: 5px 0 5px 0;
       font-size: 24px;
       text-align: center;
-      color: #ff3333;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px #ff0000;
+      color: #ff7799;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0px #ffe0e8;
+    }
+    body.death-mode h1 {
+      color: #ff0000 !important;
+      text-shadow: 0 0 15px #ff0000 !important;
+    }
+
+    /* 音量調整バー */
+    .volume-container {
+      background: #ffffff;
+      border: 2px solid #ffccd5;
+      border-radius: 20px;
+      padding: 4px 15px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #ff7799;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 5px rgba(255, 182, 193, 0.4);
+    }
+    .volume-container input {
+      accent-color: #ff7799;
+      cursor: pointer;
     }
 
     /* HPゲージ */
     .hp-container {
       width: 100%;
       max-width: 800px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 2px solid #880000;
-      border-radius: 8px;
+      background: #ffffff;
+      border: 3px solid #ffb6c1;
+      border-radius: 15px;
       padding: 6px 12px;
       margin-bottom: 10px;
-      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+      box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+    }
+    body.death-mode .hp-container {
+      background: #1a0000;
+      border-color: #880000;
+      box-shadow: 0 0 15px #ff0000;
     }
     .hp-header {
       display: flex;
       justify-content: space-between;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       margin-bottom: 4px;
-      color: #ff8888;
+      color: #ff6688;
     }
+    body.death-mode .hp-header { color: #ff4444; }
     .hp-bar-outer {
       width: 100%;
       height: 18px;
-      background: #330000;
-      border-radius: 9px;
+      background: #ffe6eb;
+      border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #ff3333;
     }
+    body.death-mode .hp-bar-outer { background: #330000; }
     .hp-bar-inner {
       height: 100%;
       width: 100%;
-      background: linear-gradient(90deg, #ff0000, #ff6600);
+      background: linear-gradient(90deg, #ff99bb, #ff5588);
+      border-radius: 10px;
       transition: width 0.3s ease;
     }
+    body.death-mode .hp-bar-inner { background: #ff0000; }
     
     .game-layout {
       display: flex;
@@ -74,92 +124,112 @@
     }
 
     .game-board {
-      background-color: #2b0808;
-      border: 4px solid #5a0e0e;
-      border-radius: 12px;
+      background-color: #fff0f3;
+      border: 4px solid #ffb6c1;
+      border-radius: 20px;
       flex: 1;
       width: 100%;
       max-width: 800px;
       padding: 12px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+      box-shadow: 0 8px 15px rgba(255, 182, 193, 0.4);
       position: relative;
+    }
+    body.death-mode .game-board {
+      background-color: #2b0808;
+      border-color: #5a0e0e;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
     }
 
     .ranking-board {
-      background-color: #200505;
-      border: 4px solid #5a0e0e;
-      border-radius: 12px;
+      background-color: #ffffff;
+      border: 3px solid #ffccd5;
+      border-radius: 20px;
       width: 100%;
       max-width: 800px;
       padding: 12px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
+    }
+    body.death-mode .ranking-board {
+      background-color: #150000;
+      border-color: #5a0e0e;
     }
     .ranking-board h2 {
-      font-size: 16px;
+      font-size: 15px;
       margin-top: 0;
-      color: #ff4444;
+      color: #ff6688;
       text-align: center;
-      border-bottom: 2px solid #880000;
+      border-bottom: 2px dashed #ffccd5;
       padding-bottom: 6px;
     }
     .ranking-list { list-style: none; padding: 0; margin: 0; }
     .ranking-item {
-      background: rgba(0,0,0,0.5);
+      background: #fff5f7;
       margin-bottom: 6px;
-      padding: 6px 8px;
-      border-radius: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
       font-size: 12px;
-      border-left: 3px solid #ff0000;
+      border-left: 4px solid #ff88aa;
     }
-    .ranking-item .rank-head { font-weight: bold; color: #ff9999; display: flex; justify-content: space-between; }
-    .ranking-item .rank-player { color: #ffffff; font-size: 11px; margin-top: 2px; }
-    .ranking-item .rank-detail { font-size: 10px; color: #bdc3c7; margin-top: 2px; }
+    body.death-mode .ranking-item {
+      background: rgba(0,0,0,0.6);
+      border-left-color: #ff0000;
+    }
+    .ranking-item .rank-head { font-weight: bold; color: #ff5577; display: flex; justify-content: space-between; }
+    .ranking-item .rank-player { color: #5a4048; font-size: 11px; margin-top: 2px; }
+    body.death-mode .ranking-item .rank-player { color: #ffffff; }
+    .ranking-item .rank-detail { font-size: 10px; color: #886670; margin-top: 2px; }
 
     .info-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 8px 10px;
-      border-radius: 8px;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 12px;
       margin-bottom: 10px;
       font-size: 12px;
       font-weight: bold;
+      color: #775560;
       flex-wrap: wrap;
       gap: 6px;
     }
+    body.death-mode .info-bar { background: rgba(0,0,0,0.5); color: #ffaaaa; }
+
     .dora-area { display: flex; align-items: center; gap: 4px; }
 
     .tenpai-info-bar {
-      background: rgba(255, 0, 0, 0.15);
-      border: 1px solid #ff3333;
+      background: #ffe6ec;
+      border: 1px solid #ffb6c1;
       padding: 6px 10px;
-      border-radius: 6px;
+      border-radius: 10px;
       margin-bottom: 10px;
       font-size: 12px;
-      color: #ff9999;
+      color: #ff5577;
       display: flex;
       align-items: center;
       gap: 6px;
       min-height: 38px;
     }
+    body.death-mode .tenpai-info-bar { background: rgba(255,0,0,0.2); border-color: #ff3333; color: #ff9999; }
 
     .status-badge {
-      background-color: #e74c3c;
+      background-color: #ff6688;
       color: white;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
       font-size: 11px;
       display: none;
     }
     .river-section {
       min-height: 90px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
+      background: #ffffff;
+      border-radius: 12px;
       padding: 8px;
       margin-bottom: 10px;
+      border: 2px dashed #ffccd5;
     }
-    .river-title { font-size: 11px; color: #ff6666; margin-bottom: 4px; }
+    body.death-mode .river-section { background: rgba(0,0,0,0.4); border-color: #880000; }
+    .river-title { font-size: 11px; color: #ff7799; margin-bottom: 4px; font-weight: bold; }
     .tile-container { display: flex; flex-wrap: wrap; gap: 3px; }
     
     .hand-section {
@@ -183,11 +253,11 @@
       max-width: 40px;
       min-width: 22px;
       height: 52px;
-      background: #f4ebd9;
-      color: #333;
-      border-radius: 4px;
-      border-bottom: 3px solid #b8a98f;
-      box-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+      background: #ffffff;
+      color: #443338;
+      border-radius: 6px;
+      border-bottom: 3px solid #e6ccd3;
+      box-shadow: 0 2px 4px rgba(255, 182, 193, 0.4);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -199,57 +269,45 @@
       flex-shrink: 0;
       transition: transform 0.1s, opacity 0.3s;
     }
-    .tile:active { transform: translateY(-3px); background-color: #e6c280; }
+    .tile:active { transform: translateY(-3px); background-color: #fff0f3; }
     .tile.riichi-target {
-      border: 2px solid #e74c3c;
+      border: 2px solid #ff4477;
       animation: pulse 1s infinite;
     }
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-      70% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(255, 68, 119, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 68, 119, 0); }
     }
 
-    /* ★ 牌が上空へフェードアウトして飛んでいくアニメーション */
+    /* 牌飛散・フェードアウト */
     .tile.destroying {
       animation: flyFadeAnim 0.7s ease-out forwards !important;
       z-index: 20;
     }
     @keyframes flyFadeAnim {
-      0% {
-        transform: translateY(0) scale(1) rotate(0deg);
-        filter: brightness(1);
-        opacity: 1;
-      }
-      50% {
-        filter: brightness(2) drop-shadow(0 0 12px #ff3333);
-        background-color: #ff4444;
-        color: #ffffff;
-      }
-      100% {
-        transform: translateY(-80px) scale(1.3) rotate(20deg);
-        opacity: 0;
-        filter: brightness(3);
-      }
+      0% { transform: translateY(0) scale(1); filter: brightness(1); opacity: 1; }
+      50% { filter: brightness(1.5) drop-shadow(0 0 10px #ff7799); background-color: #ff99bb; color: #fff; }
+      100% { transform: translateY(-80px) scale(1.3) rotate(20deg); opacity: 0; }
     }
 
-    .tile.red { color: #c0392b; }
+    .tile.red { color: #e04466; }
     .tile.green { color: #27ae60; }
-    .tile.black { color: #2c3e50; }
-    .tile.aka-dora { background-color: #fadbd8; }
+    .tile.black { color: #443338; }
+    .tile.aka-dora { background-color: #ffe6ec; }
     .tile-num { font-size: 15px; line-height: 1; }
     .tile-type { font-size: 9px; margin-top: 1px; }
 
     .tile.small {
       width: 24px;
       height: 34px;
-      border-bottom: 2px solid #b8a98f;
+      border-bottom: 2px solid #e6ccd3;
     }
     .tile.small .tile-num { font-size: 11px; }
     .tile.small .tile-type { font-size: 8px; }
 
     .drawn-tile-area {
-      border-left: 2px dashed rgba(255,255,255,0.3);
+      border-left: 2px dashed #ffb6c1;
       padding-left: 6px;
       flex-shrink: 0;
     }
@@ -262,54 +320,58 @@
       flex-wrap: wrap;
     }
     button {
-      background-color: #a02020;
+      background-color: #ff88aa;
       border: none;
       color: white;
-      padding: 8px 12px;
+      padding: 8px 14px;
       font-size: 13px;
       font-weight: bold;
-      border-radius: 6px;
+      border-radius: 15px;
       cursor: pointer;
-      box-shadow: 0 3px 0 #601010;
+      box-shadow: 0 3px 0 #e06688;
       touch-action: manipulation;
     }
-    button:active { transform: translateY(2px); box-shadow: 0 1px 0 #601010; }
-    button:disabled { background-color: #4a3030; box-shadow: 0 3px 0 #2a1818; cursor: not-allowed; opacity: 0.6; }
-    button.btn-riichi { background-color: #e74c3c; box-shadow: 0 3px 0 #922b21; }
-    button.btn-kan { background-color: #8e44ad; box-shadow: 0 3px 0 #5b2c6f; }
-    button.btn-sacrifice { background-color: #27ae60; box-shadow: 0 3px 0 #1e8449; }
-    button.btn-kyushu { background-color: #d35400; box-shadow: 0 3px 0 #a04000; }
-    button.btn-cancel { background-color: #7f8c8d; box-shadow: 0 3px 0 #5f6a6a; margin-top: 8px; }
+    button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e06688; }
+    button:disabled { background-color: #ddccdd; box-shadow: 0 3px 0 #bbaa33; cursor: not-allowed; opacity: 0.6; }
+    button.btn-riichi { background-color: #ff5577; box-shadow: 0 3px 0 #cc3355; }
+    button.btn-kan { background-color: #ba68c8; box-shadow: 0 3px 0 #8e24aa; }
+    button.btn-sacrifice { background-color: #4db6ac; box-shadow: 0 3px 0 #00897b; }
+    button.btn-kyushu { background-color: #ff9800; box-shadow: 0 3px 0 #f57c00; }
+    button.btn-cancel { background-color: #b0bec5; box-shadow: 0 3px 0 #78909c; margin-top: 8px; }
 
     button.btn-win-glow {
-      background-color: #e74c3c !important;
-      box-shadow: 0 3px 0 #922b21 !important;
+      background-color: #ff4081 !important;
+      box-shadow: 0 3px 0 #c2185b !important;
       animation: winGlow 0.8s infinite alternate;
     }
     @keyframes winGlow {
-      0% { transform: scale(1); box-shadow: 0 0 5px #e74c3c; }
-      100% { transform: scale(1.05); box-shadow: 0 0 15px #f1c40f; }
+      0% { transform: scale(1); box-shadow: 0 0 5px #ff4081; }
+      100% { transform: scale(1.05); box-shadow: 0 0 15px #ffd54f; }
     }
 
     .result-box {
       margin-top: 12px;
-      background: rgba(0,0,0,0.6);
-      border-radius: 8px;
+      background: #ffffff;
+      border-radius: 12px;
       padding: 8px;
       text-align: center;
       min-height: 40px;
+      border: 2px solid #ffccd5;
     }
-    .result-title { font-size: 16px; font-weight: bold; color: #ff5555; }
-    .yaku-list { margin: 4px 0; font-size: 12px; color: #ecf0f1; }
-    .score-detail { font-size: 14px; color: #2ecc71; font-weight: bold; }
-    .error-msg { font-size: 12px; color: #e74c3c; margin-top: 4px; }
+    body.death-mode .result-box { background: rgba(0,0,0,0.8); border-color: #880000; }
+    .result-title { font-size: 18px; font-weight: bold; color: #ff5577; }
+    body.death-mode .result-title { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    .yaku-list { margin: 4px 0; font-size: 12px; color: #665560; }
+    body.death-mode .yaku-list { color: #ffaaaa; }
+    .score-detail { font-size: 14px; color: #009688; font-weight: bold; }
+    .error-msg { font-size: 12px; color: #e53935; margin-top: 4px; }
 
     /* モーダル＆ミニゲーム オーバーレイ */
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
-      border-radius: 10px;
+      background: rgba(255, 245, 247, 0.92);
+      border-radius: 18px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -319,13 +381,16 @@
       padding: 15px;
       text-align: center;
     }
-    .modal-title { font-size: 18px; font-weight: bold; color: #ff4444; text-shadow: 0 0 8px #ff0000; }
-    .modal-desc { font-size: 13px; color: #cccccc; margin-bottom: 5px; }
+    body.death-mode .modal-overlay { background: rgba(10, 0, 0, 0.95); }
+    .modal-title { font-size: 18px; font-weight: bold; color: #ff5577; }
+    body.death-mode .modal-title { color: #ff0000; }
+    .modal-desc { font-size: 13px; color: #776670; margin-bottom: 5px; }
+    body.death-mode .modal-desc { color: #cccccc; }
 
     #dodge-canvas {
-      background: #000;
-      border: 2px solid #ff0000;
-      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+      background: #22111a;
+      border: 3px solid #ff88aa;
+      border-radius: 10px;
       max-width: 100%;
     }
 
@@ -340,60 +405,66 @@
       user-select: none;
     }
     .dpad-btn {
-      background: #441111;
-      border: 1px solid #ff4444;
+      background: #ffb6c1;
+      border: 1px solid #ff88aa;
       color: #ffffff;
       font-size: 18px;
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      box-shadow: 0 2px 0 #220000;
+      box-shadow: 0 2px 0 #e06688;
       touch-action: manipulation;
     }
     .dpad-btn:active {
-      background: #882222;
+      background: #ff88aa;
       transform: translateY(2px);
       box-shadow: none;
     }
 
     .quiz-options { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 300px; }
-    .quiz-btn { background: #331111; border: 1px solid #ff4444; color: #fff; padding: 10px; border-radius: 6px; cursor: pointer; }
-    .quiz-btn:hover { background: #661111; }
+    .quiz-btn { background: #ffffff; border: 2px solid #ff88aa; color: #ff5577; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .quiz-btn:hover { background: #ffe6ec; }
     
-    .flash-num { font-size: 64px; font-weight: bold; color: #ff3333; text-shadow: 0 0 20px #ff0000; height: 80px; }
-    .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #222; border: 1px solid #ff4444; color: white; }
+    .flash-num { font-size: 64px; font-weight: bold; color: #ff5577; text-shadow: 0 0 10px #ffe6ec; height: 80px; }
+    .flash-input { font-size: 20px; padding: 5px; width: 120px; text-align: center; background: #fff; border: 2px solid #ff88aa; border-radius: 8px; color: #55444a; }
 
     .coin-img { font-size: 50px; transition: transform 0.5s; }
 
-    /* 面子犠牲 選択肢ボタンスタイル */
     .mentsu-option-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      background: #250909;
-      border: 2px solid #ff4444;
+      background: #ffffff;
+      border: 2px solid #ff88aa;
       padding: 8px 12px;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
       margin-bottom: 8px;
       width: 100%;
       max-width: 340px;
     }
-    .mentsu-option-btn:hover { background: #4a1010; }
+    .mentsu-option-btn:hover { background: #ffe6ec; }
   </style>
 </head>
 <body>
 
-  <h1>💀 クリアは無理な麻雀 💀</h1>
+  <h1>🌸 ふわふわ麻雀 🌸</h1>
+
+  <!-- 音量スライダー -->
+  <div class="volume-container">
+    <span>🔊 音量:</span>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" oninput="updateVolume(this.value)">
+    <span id="volume-text">30%</span>
+  </div>
 
   <!-- HPバー -->
   <div class="hp-container">
     <div class="hp-header">
-      <span>精神力 (HP)</span>
+      <span>たいりょく (HP)</span>
       <span id="hp-text">1000 / 1000</span>
     </div>
     <div class="hp-bar-outer">
@@ -404,14 +475,14 @@
   <div class="game-layout">
     <div class="game-board" id="game-board">
       <div class="info-bar">
-        <div>自風: <span style="color:#ff5555;">東家（親）</span></div>
+        <div>自風: <span style="color:#ff5577;">東家（親）</span></div>
         <div>残り: <span id="deck-count">0</span></div>
         <div>打牌数: <span id="turn-count">0</span></div>
         <div class="dora-area">
           <span>ドラ:</span>
           <div id="dora-tile-container" style="display:flex; gap:2px;"></div>
         </div>
-        <div id="riichi-badge" class="status-badge">立直中</div>
+        <div id="riichi-badge" class="status-badge">リーチ中</div>
       </div>
 
       <div class="tenpai-info-bar" id="tenpai-info-bar">
@@ -420,7 +491,7 @@
       </div>
 
       <div class="river-section">
-        <div class="river-title">捨て牌（河）</div>
+        <div class="river-title">すてた牌</div>
         <div id="river" class="tile-container"></div>
       </div>
 
@@ -457,7 +528,7 @@
     </div>
 
     <div class="ranking-board">
-      <h2>🔥 絶望を生き延びた者達 TOP 10</h2>
+      <h2>✨ 絶望を生き延びた者達 TOP 10</h2>
       <ol class="ranking-list" id="ranking-list">
         <li class="ranking-item" style="text-align:center;">読み込み中...</li>
       </ol>
@@ -479,6 +550,13 @@
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
+    // --- 音量コントロール変数 ---
+    let globalVolume = 0.3;
+    function updateVolume(val) {
+      globalVolume = parseFloat(val);
+      document.getElementById('volume-text').innerText = `${Math.round(globalVolume * 100)}%`;
+    }
+
     // --- Web Audio API (SE) ---
     let audioCtx = null;
     function initAudio() {
@@ -486,6 +564,7 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
     function playSE(type) {
+      if (globalVolume <= 0) return;
       initAudio();
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
@@ -495,51 +574,57 @@
       if (type === 'discard') {
         osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now);
         osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
-        gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        gain.gain.setValueAtTime(0.5 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now); osc.stop(now + 0.08);
       } else if (type === 'damage') {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now);
         osc.frequency.linearRampToValueAtTime(40, now + 0.2);
-        gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        gain.gain.setValueAtTime(0.6 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'death') {
+        // ★ GAME OVER時の重苦しい音
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(20, now + 1.2);
+        gain.gain.setValueAtTime(1.0 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc.start(now); osc.stop(now + 1.2);
       } else if (type === 'destroy') {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, now);
         osc.frequency.exponentialRampToValueAtTime(100, now + 0.5);
-        gain.gain.setValueAtTime(0.7, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        gain.gain.setValueAtTime(0.7 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
         osc.start(now); osc.stop(now + 0.5);
       } else if (type === 'heal') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
         osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
-        gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        gain.gain.setValueAtTime(0.4 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
         osc.start(now); osc.stop(now + 0.25);
       } else if (type === 'event') {
         osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
         osc.frequency.setValueAtTime(600, now + 0.1);
-        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        gain.gain.setValueAtTime(0.3 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         osc.start(now); osc.stop(now + 0.3);
       } else if (type === 'riichi') {
         osc.type = 'square'; osc.frequency.setValueAtTime(523.25, now);
         osc.frequency.setValueAtTime(659.25, now + 0.08);
         osc.frequency.setValueAtTime(783.99, now + 0.16);
-        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        gain.gain.setValueAtTime(0.3 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         osc.start(now); osc.stop(now + 0.3);
       } else if (type === 'win') {
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
           const o = audioCtx.createOscillator(), g = audioCtx.createGain();
           o.type = 'triangle'; o.frequency.value = freq;
           const st = now + i * 0.12, dur = i === 3 ? 0.7 : 0.14;
-          g.gain.setValueAtTime(0.3, st); g.gain.exponentialRampToValueAtTime(0.001, st + dur);
+          g.gain.setValueAtTime(0.3 * globalVolume, st); g.gain.exponentialRampToValueAtTime(0.001, st + dur);
           o.connect(g); g.connect(audioCtx.destination);
           o.start(st); o.stop(st + dur);
         });
       } else if (type === 'error') {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
-        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        gain.gain.setValueAtTime(0.2 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
         osc.start(now); osc.stop(now + 0.25);
       } else if (type === 'sort') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now);
         osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
-        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        gain.gain.setValueAtTime(0.2 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
       }
     }
@@ -553,7 +638,7 @@
     let doraIndicators = [], actualDoraTiles = [];
     let kanCount = 0;
     let turn = 0; // 打牌数
-    let lastSacrificeTurn = -5; // ★ 前回犠牲を使用したターン（5回に1回制限用）
+    let lastSacrificeTurn = -5; // 前回犠牲ターン
     let isRiichi = false, isRiichiSelecting = false, isGameOver = false;
     let autoDiscardTimer = null;
     let hp = 1000;
@@ -621,13 +706,16 @@
       return actualDoraTiles.some(dt => dt.type === tile.type && dt.val === tile.val);
     }
 
+    // ★ HP更新＆GAME OVER時のガチデス感発動！
     function updateHP(amount) {
       hp += amount;
       if (hp > MAX_HP) hp = MAX_HP;
       if (hp <= 0) {
         hp = 0;
         isGameOver = true;
-        showMessage('💀 GAME OVER', 'HPが0になりました。あなたの負けです。', '');
+        document.body.classList.add('death-mode'); // 💀 暗転＆シェイク発動
+        playSE('death');
+        showMessage('💀 GAME OVER 💀', '精神力が尽きた...。あなたの負けです。', '');
       }
       document.getElementById('hp-text').innerText = `${hp} / ${MAX_HP}`;
       document.getElementById('hp-bar').style.width = `${(hp / MAX_HP) * 100}%`;
@@ -635,6 +723,8 @@
 
     function initGame() {
       if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
+      document.body.classList.remove('death-mode'); // 通常モードに戻す
+
       deck = createDeck();
       hand = []; river = []; turn = 0; kanCount = 0; hp = MAX_HP;
       lastSacrificeTurn = -5;
@@ -720,8 +810,8 @@
       if (!isFree) {
         let dmg = isTileDora(discarded) ? -100 : -50;
         updateHP(dmg);
-        playSE('damage');
         if (isGameOver) { render(); return; }
+        playSE('damage');
       }
 
       if (isRiichiSelecting) {
@@ -750,7 +840,6 @@
       sortTiles(hand);
     }
 
-    // ★ 牌が上へ飛んでフェードアウトして飛散・消滅する演出
     function removeRandomTiles(num) {
       playSE('destroy');
       let targetElements = [];
@@ -775,7 +864,6 @@
       }, 700);
     }
 
-    // ★ 九種九牌（きゅうしゅきゅうはい）チェック＆実行
     function countYaochuTypes(tiles) {
       let set = new Set();
       tiles.forEach(t => {
@@ -790,7 +878,6 @@
       playSE('sort');
       openModal("🀄 九種九牌（流局）！", "手牌の九種九牌を倒し、全て山札に戻して引き直します！", "");
 
-      // 手牌とツモ牌を全て山札に戻してシャッフル
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
       deck = [...deck, ...fullTiles].sort(() => Math.random() - 0.5);
@@ -812,7 +899,6 @@
       let counts = getTileCounts(tiles);
       let list = [];
 
-      // 刻子 (333など)
       for (let k in counts) {
         if (counts[k] >= 3) {
           let [type, valStr] = k.split('_'), val = parseInt(valStr);
@@ -821,7 +907,6 @@
         }
       }
 
-      // 順子 (123など)
       ['m', 'p', 's'].forEach(type => {
         for (let n = 1; n <= 7; n++) {
           let t1 = tiles.find(t => t.type === type && t.val === n);
@@ -837,7 +922,7 @@
 
     function onClickSacrificeButton() {
       if (isGameOver) return;
-      if (turn - lastSacrificeTurn < 5) return; // 5ターン未経過時不可
+      if (turn - lastSacrificeTurn < 5) return;
 
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
@@ -848,7 +933,7 @@
       let html = '<div style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">';
       mentsuList.forEach((m, idx) => {
         let hasDora = m.tiles.some(t => isTileDora(t));
-        let healAmt = hasDora ? 400 : 200; // ★ 通常200 / ドラ含む400
+        let healAmt = hasDora ? 400 : 200;
         html += `<div class="mentsu-option-btn" onclick="execSacrificeMentsuByIndex(${idx});">`;
         html += '<div style="display:flex; gap:3px;">';
         m.tiles.forEach(t => {
@@ -856,9 +941,8 @@
           html += el.outerHTML;
         });
         html += '</div>';
-        html += `<span style="color:${hasDora ? '#f1c40f' : '#2ecc71'}; font-weight:bold; font-size:13px;">を捧げる (+${healAmt})</span></div>`;
+        html += `<span style="color:${hasDora ? '#ff9800' : '#4db6ac'}; font-weight:bold; font-size:13px;">を捧げる (+${healAmt})</span></div>`;
       });
-      // ★ キャンセルボタンを追加
       html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
 
@@ -878,12 +962,11 @@
       if (drawnTile) fullTiles.push(drawnTile);
 
       let hasDora = mentsuObj.tiles.some(t => isTileDora(t));
-      let healAmount = hasDora ? 400 : 200; // ★ 回復量200 (ドラ400)
+      let healAmount = hasDora ? 400 : 200;
 
       playSE('destroy');
-      lastSacrificeTurn = turn; // ★ 使用ターンを更新
+      lastSacrificeTurn = turn;
 
-      // 該当牌を除外（山にも河にも行かない）
       mentsuObj.tiles.forEach(target => {
         if (drawnTile && drawnTile.type === target.type && drawnTile.val === target.val && drawnTile.isAka === target.isAka) {
           drawnTile = null;
@@ -911,7 +994,7 @@
       }, 300);
     }
 
-    // --- カン機能（回復量変更＆河移動） ---
+    // --- カン機能 ---
     function onClickKanButton() {
       if (isGameOver) return;
       const fullTiles = [...hand];
@@ -935,7 +1018,6 @@
         let [type, valStr] = key.split('_');
         html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
       });
-      // ★ キャンセルボタン追加
       html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
       openModal("どの牌をカンしますか？", "", html);
@@ -950,9 +1032,8 @@
 
       let targetTiles = fullTiles.filter(t => t.type === type && t.val === val);
       let hasDora = targetTiles.some(t => isTileDora(t));
-      let healAmount = hasDora ? 500 : 300; // ★ カンは300回復（ドラ500）
+      let healAmount = hasDora ? 500 : 300;
 
-      // カンした4枚の手牌を削除し、捨て牌（河）に移動！
       targetTiles.forEach(t => river.push(t));
 
       if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
@@ -977,7 +1058,7 @@
         return;
       }
 
-      openModal("🀄 カン！", `${hasDora ? '🐉 ドラカン！' : ''}HPが ${healAmount} 回復しました！（4枚は河へ移動）`, "");
+      openModal("🀄 カン！", `${hasDora ? '🐉 ドラカン！' : ''}HPが ${healAmount} 回復しました！（河へ移動）`, "");
       setTimeout(() => {
         closeModal();
         drawTile();
@@ -1020,7 +1101,7 @@
       let win = Math.random() < 0.5;
       if (win) {
         coinSuccessCount++;
-        coinArea.innerHTML = `<div class='coin-img'>🪙</div><p style='color:#2ecc71;'>成功！ (${coinSuccessCount}/3)</p>`;
+        coinArea.innerHTML = `<div class='coin-img'>🪙</div><p style='color:#4db6ac;'>成功！ (${coinSuccessCount}/3)</p>`;
         if (coinSuccessCount >= 3) {
           coinSuccessCount = 0;
           setTimeout(() => {
@@ -1034,7 +1115,7 @@
         }
       } else {
         coinSuccessCount = 0;
-        coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e74c3c;'>失敗！ 牌が3つ暴発しました！</p>`;
+        coinArea.innerHTML = `<div class='coin-img'>💥</div><p style='color:#e53935;'>失敗！ 牌が3つ暴発しました！</p>`;
         removeRandomTiles(3);
         setTimeout(() => { closeModal(); render(); }, 1500);
       }
@@ -1077,7 +1158,7 @@
         isGameOver = true;
         render();
 
-        let playerName = prompt('🎉 理不尽を乗り越えました！ランキングに登録する名前を入力してください:', '絶望の生存者');
+        let playerName = prompt('🎉 理不尽を乗り越えました！ランキングに登録する名前を入力してください:', 'ふわふわ生存者');
         if (playerName) {
           await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
         }
@@ -1111,8 +1192,8 @@
     }
 
     function startDodgeGame(onSuccess) {
-      openModal("⚡ 回避ゲーム！", "5秒後に開始！【矢印キー】または下部の【ボタン】で赤枠を動かして避けろ！", `
-        <div id="dodge-timer" style="font-size:20px; color:#ff3333; font-weight:bold; margin-bottom:5px;">5</div>
+      openModal("⚡ 回避ゲーム！", "5秒後に開始！【矢印キー】または下部の【ボタン】で動かして避けろ！", `
+        <div id="dodge-timer" style="font-size:20px; color:#ff5577; font-weight:bold; margin-bottom:5px;">5</div>
         <canvas id="dodge-canvas" width="360" height="240"></canvas>
         <div class="dpad-container">
           <div></div>
@@ -1175,10 +1256,10 @@
         if (keys['ArrowLeft'] && px > 0) px -= speed;
         if (keys['ArrowRight'] && px < canvas.width - pSize) px += speed;
 
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = '#22111a';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = '#ff0000';
+        ctx.strokeStyle = '#ff88aa';
         ctx.lineWidth = 2;
         ctx.strokeRect(px, py, pSize, pSize);
 
@@ -1495,7 +1576,7 @@
           </div>
           <div class="rank-player">👤 ${escapeHTML(item.player_name)} (${item.calc_point} pt)</div>
           <div class="rank-detail">${item.score_text}</div>
-          <div class="rank-detail" style="color: #ff9999;">役: ${escapeHTML(item.yaku_text)}</div>
+          <div class="rank-detail" style="color: #ff5577;">役: ${escapeHTML(item.yaku_text)}</div>
         `;
         listEl.appendChild(li);
       });
@@ -1537,7 +1618,7 @@
         }
       }
 
-      // ★ 面子消費回復ボタンの表示＆5ターン制限制御
+      // 面子消費回復ボタンの表示＆5ターン制限制御
       const btnSacrifice = document.getElementById('btn-sacrifice');
       let availableMentsu = findAvailableMentsu(fullTiles);
       if (!isGameOver && availableMentsu.length > 0) {
@@ -1554,7 +1635,7 @@
         btnSacrifice.style.display = 'none';
       }
 
-      // ★ 九種九牌ボタン制御
+      // 九種九牌ボタン制御
       const btnKyushu = document.getElementById('btn-kyushu');
       if (!isGameOver && countYaochuTypes(fullTiles) >= 9) {
         btnKyushu.style.display = 'inline-block';
