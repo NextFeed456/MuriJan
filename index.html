@@ -529,12 +529,12 @@
       box-shadow: 0 0 15px rgba(255, 136, 170, 0.3);
     }
 
-    /* スマホ用 十字キーUIスタイル */
+    /* スマホ用 十字キーUIスタイル（矢印キーを少し小さく調整） */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 42px);
-      grid-template-rows: repeat(2, 42px);
-      gap: 4px;
+      grid-template-columns: repeat(3, 34px);
+      grid-template-rows: repeat(2, 34px);
+      gap: 3px;
       margin-top: 6px;
       justify-content: center;
       user-select: none;
@@ -543,9 +543,9 @@
       background: #ffb6c1;
       border: 1px solid #ff88aa;
       color: #ffffff;
-      font-size: 16px;
+      font-size: 13px;
       font-weight: bold;
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -647,12 +647,12 @@
       <ul>
         <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
         <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
-        <li><b>ドラDiscardのペンダント</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
-        <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
-        <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
-        <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
+        <li><b>ドラDiscardのペナルティ</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>面子犠牲 (HP回復)</b>: 手牌の順子や刻子を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。</li>
+        <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。河へ移動。</li>
+        <li><b>山札リセット</b>: 山札が0になると捨て牌が全て戻ってシャッフルし、<b>HP500回復</b>！</li>
         <li><b>九種九牌</b>: 一九字牌が9種以上あればボタン出現。全牌を山札に戻して引き直し。</li>
-        <li><b>リーチ試選</b>: コイントス または「丁と半」の2択から選択可能！（丁・半は2回まで挑戦）</li>
+        <li><b>リーチ選択</b>: コイントス または「丁と半」の2択から選択可能！（丁・半は2回まで挑戦）</li>
         <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
         <li><b>アガリの試練</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！<b>リーチ中に失敗するとリーチが解除</b>されます。</li>
       </ul>
@@ -1157,7 +1157,7 @@
     }
 
     function removeRandomTiles(num, callback) {
-      closeModal(); // モーダルを先に閉じることで、ウィンドウ外に牌が飛ぶ演出が見えるようにする
+      closeModal();
       
       setTimeout(() => {
         playSE('destroy');
@@ -1439,7 +1439,7 @@
       }
     }
 
-    // --- 💡 リーチ選択システム（コイントス or 丁半 2回まで） ---
+    // --- リーチ選択システム ---
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
