@@ -630,7 +630,7 @@
       <ul>
         <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
         <li><b>リーチ中の保護</b>: <b>リーチ成立中は打牌によるHP減少が停止</b>します！</li>
-        <li><b>ドラDiscardのペナルティ</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>ドラDiscardのペンダント</b>: 通常時ドラ（赤ドラ含む）を捨てると100減少。</li>
         <li><b>面子犠牲 (HP回復)</b>: 手牌の順子や刻子を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。</li>
         <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。河へ移動。</li>
         <li><b>山札リセット</b>: 山札が0になると捨て牌が全て戻ってシャッフルし、<b>HP500回復</b>！</li>
@@ -1399,7 +1399,6 @@
         shuffleAllHandTiles();
         setTimeout(() => { closeModal(); drawTile(); render(); }, 2000);
       } else {
-        // 10打牌ごとのミニゲーム（回避・クイズ・暗算）
         let onSuccess = () => { closeModal(); drawTile(); render(); };
         let onFailure = () => {
           if (isRiichi) {
@@ -1428,7 +1427,6 @@
       }, 1500);
     }
 
-    // --- ランダムなミニゲームを選択して実行する共通関数 ---
     function runRandomMiniGame(onSuccess, onFailure) {
       let gameType = Math.floor(Math.random() * 3);
       if (gameType === 0) {
@@ -1440,7 +1438,6 @@
       }
     }
 
-    // --- リーチ選択システム ---
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
@@ -1548,7 +1545,6 @@
       }, 1500);
     }
 
-    // --- ロン時（アガリ試練）を3連続の完全にランダムなミニゲームに変更 ---
     function startAgariSequence() {
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
@@ -1583,17 +1579,33 @@
       if (checkWin(fullTiles)) {
         playSE('win');
         let res = evaluateHand(fullTiles, isRiichi);
-        let yakuStr = res.yakus.map(y => `${y.name}`).join('・');
+        let yakuNames = res.yakus.map(y => y.name).join('・');
         
-        openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！偉業を称えて名前を刻んでくれ！", "");
-        showMessage(`🎉 生き残れた英雄！（打牌数:${turn}）`, yakuStr, res.scoreText);
+        // クリア画面（モーダルおよびメッセージ表示の拡張）
+        let tilesHtml = '<div style="display:flex; gap:2px; justify-content:center; flex-wrap:wrap; margin:8px 0;">';
+        fullTiles.forEach(t => {
+          let el = createTileElement(t, null, true);
+          tilesHtml += el.outerHTML;
+        });
+        tilesHtml += '</div>';
+
+        let modalContentHtml = `
+          ${tilesHtml}
+          <div style="font-size:12px; color:#ffe6ec; margin:4px 0;"><b>役:</b> ${yakuNames}</div>
+          <div style="font-size:14px; color:#ffd54f; font-weight:bold; margin:4px 0;">${res.rankTitle} (${res.rawScore}点)</div>
+          <div style="font-size:12px; color:#ffffff; margin-bottom:8px;">合計点数: <b>${res.scoreText}</b></div>
+          <button onclick="initGame()" style="background-color:#ff4081; padding:8px 16px; border-radius:12px; font-weight:bold; color:white; border:none; cursor:pointer; box-shadow:0 3px 0 #c2185b;">もう一度 Play</button>
+        `;
+
+        openModal("🎉 奇跡達成！ 🎉", "おめでとう！君は生き残れた英雄だ！", modalContentHtml);
+        showMessage(`🎉 生き残れた英雄！（打牌数:${turn}）`, yakuNames, res.scoreText);
         isGameOver = true;
         render();
 
         setTimeout(async () => {
           let playerName = prompt('🎉 おめでとう！君は生き残れた英雄だ！歴史に名を刻むため、名前を入力してください:', '生き残れた英雄');
           if (playerName) {
-            await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuStr);
+            await saveGlobalScore(playerName, turn, hp, res.rawScore, res.scoreText, yakuNames);
           }
         }, 1200);
       }
@@ -1964,8 +1976,9 @@
         let doubleCount = 0;
         yakus.forEach(y => { doubleCount += (y.isDouble ? 2 : 1); });
         let rawScore = 32000 * doubleCount;
-        let scoreText = doubleCount > 1 ? `${doubleCount}倍役満 ${rawScore}点` : `役満 32000点`;
-        return { yakus, rawScore, scoreText };
+        let rankTitle = doubleCount > 1 ? `${doubleCount}倍役満` : `役満`;
+        let scoreText = `${rankTitle} ${rawScore}点`;
+        return { yakus, rawScore, rankTitle, scoreText };
       }
 
       yakus.push({ name: '門前清自摸和', han: 1 });
@@ -1993,25 +2006,30 @@
       let totalHan = yakus.reduce((sum, y) => sum + y.han, 0);
       let fu = (kanCount === 0 && yakus.some(y => y.name === '七対子')) ? 25 : 30;
 
-      let { rawScore, scoreText } = calculateScore(totalHan, fu);
+      let { rawScore, rankTitle, scoreText } = calculateScore(totalHan, fu);
 
-      return { yakus, totalHan, fu, rawScore, scoreText };
+      return { yakus, totalHan, fu, rawScore, rankTitle, scoreText };
     }
 
     function calculateScore(han, fu) {
-      let rawScore = 0, text = '';
-      if (han >= 13) { rawScore = 32000; text = `役満 32000点 (${han}翻)`; }
-      else if (han >= 11) { rawScore = 24000; text = `三倍満 24000点 (${han}翻)`; }
-      else if (han >= 8)  { rawScore = 16000; text = `倍満 16000点 (${han}翻)`; }
-      else if (han >= 6)  { rawScore = 12000; text = `跳満 12000点 (${han}翻)`; }
-      else if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
-        rawScore = 12000; text = `親満貫 12000点 (${han}翻${fu}符)`;
+      let rawScore = 0, rankTitle = '', text = '';
+      if (han >= 13) {
+        rawScore = 32000; rankTitle = '役満'; text = `役満 32000点 (${han}翻)`;
+      } else if (han >= 11) {
+        rawScore = 24000; rankTitle = '三倍満'; text = `三倍満 24000点 (${han}翻)`;
+      } else if (han >= 8) {
+        rawScore = 16000; rankTitle = '倍満'; text = `倍満 16000点 (${han}翻)`;
+      } else if (han >= 6) {
+        rawScore = 12000; rankTitle = '跳満'; text = `跳満 12000点 (${han}翻)`;
+      } else if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+        rawScore = 12000; rankTitle = '満貫'; text = `親満貫 12000点 (${han}翻${fu}符)`;
       } else {
         let basePoint = fu * Math.pow(2, han + 2);
         rawScore = Math.ceil((basePoint * 6) / 100) * 100;
+        rankTitle = `${han}翻${fu}符`;
         text = `親 ${rawScore}点 [${han}翻${fu}符]`;
       }
-      return { rawScore, scoreText: text };
+      return { rawScore, rankTitle, scoreText: text };
     }
 
     async function saveGlobalScore(playerName, turnNum, remHp, scoreVal, scoreText, yakuText) {
