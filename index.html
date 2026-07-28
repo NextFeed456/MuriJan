@@ -25,7 +25,7 @@
       transition: background-color 0.8s ease;
     }
 
-    /* 💀 HP0時のガチデス感スタイル（bodyにクラス追加） */
+    /* 💀 HP0時のガチデス感スタイル */
     body.death-mode {
       background-color: #0d0000 !important;
       color: #ff3333 !important;
@@ -50,6 +50,54 @@
     body.death-mode h1 {
       color: #ff0000 !important;
       text-shadow: 0 0 15px #ff0000 !important;
+    }
+
+    /* 折りたたみルールのスタイル */
+    .rules-details {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 10px;
+      background: #ffffff;
+      border: 2px solid #ffccd5;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(255, 182, 193, 0.3);
+      overflow: hidden;
+    }
+    body.death-mode .rules-details {
+      background: #1a0000;
+      border-color: #5a0e0e;
+    }
+    .rules-summary {
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #ff6688;
+      cursor: pointer;
+      user-select: none;
+      background: #ffe6ec;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    body.death-mode .rules-summary {
+      background: #330000;
+      color: #ff5555;
+    }
+    .rules-content {
+      padding: 10px 15px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #5a4048;
+    }
+    body.death-mode .rules-content {
+      color: #ffaaaa;
+    }
+    .rules-content ul {
+      margin: 4px 0 0 0;
+      padding-left: 20px;
+    }
+    .rules-content li {
+      margin-bottom: 4px;
     }
 
     /* 音量調整バー */
@@ -454,6 +502,23 @@
 
   <h1>🌸 ふわふわ麻雀 🌸</h1>
 
+  <!-- ★ 折りたたみルール表記（クリック/タップで開閉） -->
+  <details class="rules-details">
+    <summary class="rules-summary">📜 全体ルールを見る（タップで開閉）</summary>
+    <div class="rules-content">
+      <ul>
+        <li><b>精神力 (HP)</b>: 初期値1000。打牌ごとに50減少し、0になると即ゲームオーバー。</li>
+        <li><b>ドラDiscardのペナルティ</b>: ドラ（赤ドラ含む）を捨てると100減少。</li>
+        <li><b>面子犠牲 (HP回復)</b>: 手牌の順子(123)や刻子(333)を完全除外して牌補充＆<b>200回復</b>（ドラ含む面子は<b>400回復</b>）。<b>5ターンに1回</b>使用可能。キャンセル可能。</li>
+        <li><b>カン (HP回復)</b>: カンをすると<b>300回復</b>（ドラ含むカンは<b>500回復</b>）。使用した4枚は<b>河（捨て牌）に移動</b>。キャンセル可能。</li>
+        <li><b>山札リセット</b>: 山札が0になると捨て牌を全て戻してシャッフルし、<b>HP500回復</b>ボーナス！</li>
+        <li><b>九種九牌</b>: 一九字牌が9種以上あればボタン出現。全牌を山札に戻して引き直し。</li>
+        <li><b>10打牌ごとのハプニング</b>: 10打牌ごとにミニゲーム（回避・クイズ・暗算）や手牌シャッフルが発生！</li>
+        <li><b>アガリの難関</b>: ツモ宣言時に3連続のミニゲームを突破しないと和了不可！</li>
+      </ul>
+    </div>
+  </details>
+
   <!-- 音量スライダー -->
   <div class="volume-container">
     <span>🔊 音量:</span>
@@ -582,7 +647,6 @@
         gain.gain.setValueAtTime(0.6 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
       } else if (type === 'death') {
-        // ★ GAME OVER時の重苦しい音
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, now);
         osc.frequency.exponentialRampToValueAtTime(20, now + 1.2);
         gain.gain.setValueAtTime(1.0 * globalVolume, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
@@ -706,14 +770,13 @@
       return actualDoraTiles.some(dt => dt.type === tile.type && dt.val === tile.val);
     }
 
-    // ★ HP更新＆GAME OVER時のガチデス感発動！
     function updateHP(amount) {
       hp += amount;
       if (hp > MAX_HP) hp = MAX_HP;
       if (hp <= 0) {
         hp = 0;
         isGameOver = true;
-        document.body.classList.add('death-mode'); // 💀 暗転＆シェイク発動
+        document.body.classList.add('death-mode');
         playSE('death');
         showMessage('💀 GAME OVER 💀', '精神力が尽きた...。あなたの負けです。', '');
       }
@@ -723,7 +786,7 @@
 
     function initGame() {
       if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
-      document.body.classList.remove('death-mode'); // 通常モードに戻す
+      document.body.classList.remove('death-mode');
 
       deck = createDeck();
       hand = []; river = []; turn = 0; kanCount = 0; hp = MAX_HP;
