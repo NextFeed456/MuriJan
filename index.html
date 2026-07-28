@@ -1171,7 +1171,7 @@
       let calcPoint = Math.round((scoreVal * remHp) / Math.max(1, turnNum));
 
       const { data, error } = await supabaseClient
-        .from('mahjong_scores')
+        .from('impossible_mahjong_score')
         .insert([{
           player_name: playerName,
           turn_count: turnNum,
@@ -1198,7 +1198,7 @@
       }
 
       const { data, error } = await supabaseClient
-        .from('mahjong_scores')
+        .from('impossible_mahjong_score')
         .select('*')
         .order('calc_point', { ascending: false })
         .limit(10);
