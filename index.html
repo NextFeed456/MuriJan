@@ -210,15 +210,27 @@
       100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
     }
 
-    /* ★ 牌消滅・飛ぶ・犠牲のアニメーション効果 */
+    /* ★ 牌が上空へフェードアウトして飛んでいくアニメーション */
     .tile.destroying {
-      animation: destroyAnim 0.6s forwards !important;
-      z-index: 10;
+      animation: flyFadeAnim 0.7s ease-out forwards !important;
+      z-index: 20;
     }
-    @keyframes destroyAnim {
-      0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
-      50% { transform: scale(1.3) rotate(15deg); filter: brightness(2) drop-shadow(0 0 15px #ff0000); background: #ff4444; color: #fff; }
-      100% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    @keyframes flyFadeAnim {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        filter: brightness(1);
+        opacity: 1;
+      }
+      50% {
+        filter: brightness(2) drop-shadow(0 0 12px #ff3333);
+        background-color: #ff4444;
+        color: #ffffff;
+      }
+      100% {
+        transform: translateY(-80px) scale(1.3) rotate(20deg);
+        opacity: 0;
+        filter: brightness(3);
+      }
     }
 
     .tile.red { color: #c0392b; }
@@ -266,6 +278,8 @@
     button.btn-riichi { background-color: #e74c3c; box-shadow: 0 3px 0 #922b21; }
     button.btn-kan { background-color: #8e44ad; box-shadow: 0 3px 0 #5b2c6f; }
     button.btn-sacrifice { background-color: #27ae60; box-shadow: 0 3px 0 #1e8449; }
+    button.btn-kyushu { background-color: #d35400; box-shadow: 0 3px 0 #a04000; }
+    button.btn-cancel { background-color: #7f8c8d; box-shadow: 0 3px 0 #5f6a6a; margin-top: 8px; }
 
     button.btn-win-glow {
       background-color: #e74c3c !important;
@@ -426,6 +440,7 @@
 
       <div class="controls">
         <button id="btn-sacrifice" class="btn-sacrifice" onclick="onClickSacrificeButton()" style="display:none;">面子捧げて回復</button>
+        <button id="btn-kyushu" class="btn-kyushu" onclick="execKyushuKyuhai()" style="display:none;">九種九牌（流局）</button>
         <button id="btn-kan" class="btn-kan" onclick="onClickKanButton()" style="display:none;">カン</button>
         <button id="btn-riichi" class="btn-riichi" onclick="startRiichiSelect()" disabled>リーチ</button>
         <button id="btn-win" onclick="startAgariSequence()">ツモアガリ</button>
@@ -488,10 +503,10 @@
         gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
       } else if (type === 'destroy') {
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(500, now);
-        osc.frequency.exponentialRampToValueAtTime(80, now + 0.4);
-        gain.gain.setValueAtTime(0.7, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now); osc.stop(now + 0.4);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.5);
+        gain.gain.setValueAtTime(0.7, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
       } else if (type === 'heal') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
         osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
@@ -538,6 +553,7 @@
     let doraIndicators = [], actualDoraTiles = [];
     let kanCount = 0;
     let turn = 0; // 打牌数
+    let lastSacrificeTurn = -5; // ★ 前回犠牲を使用したターン（5回に1回制限用）
     let isRiichi = false, isRiichiSelecting = false, isGameOver = false;
     let autoDiscardTimer = null;
     let hp = 1000;
@@ -621,6 +637,7 @@
       if (autoDiscardTimer) clearTimeout(autoDiscardTimer);
       deck = createDeck();
       hand = []; river = []; turn = 0; kanCount = 0; hp = MAX_HP;
+      lastSacrificeTurn = -5;
       isRiichi = false; isRiichiSelecting = false; isGameOver = false;
 
       doraIndicators = [deck.pop()];
@@ -733,7 +750,7 @@
       sortTiles(hand);
     }
 
-    // ★ 牌消滅・暴発演出（赤く光って破壊されるアニメーション＆音）
+    // ★ 牌が上へ飛んでフェードアウトして飛散・消滅する演出
     function removeRandomTiles(num) {
       playSE('destroy');
       let targetElements = [];
@@ -751,12 +768,43 @@
         }
       }
 
-      // アニメーション用クラス付与
       targetElements.forEach(el => el.classList.add('destroying'));
       setTimeout(() => {
         sortTiles(hand);
         render();
-      }, 600);
+      }, 700);
+    }
+
+    // ★ 九種九牌（きゅうしゅきゅうはい）チェック＆実行
+    function countYaochuTypes(tiles) {
+      let set = new Set();
+      tiles.forEach(t => {
+        let key = `${t.type}_${t.val}`;
+        if (YAOCHU_KEYS.includes(key)) set.add(key);
+      });
+      return set.size;
+    }
+
+    function execKyushuKyuhai() {
+      if (isGameOver) return;
+      playSE('sort');
+      openModal("🀄 九種九牌（流局）！", "手牌の九種九牌を倒し、全て山札に戻して引き直します！", "");
+
+      // 手牌とツモ牌を全て山札に戻してシャッフル
+      const fullTiles = [...hand];
+      if (drawnTile) fullTiles.push(drawnTile);
+      deck = [...deck, ...fullTiles].sort(() => Math.random() - 0.5);
+
+      hand = [];
+      drawnTile = null;
+
+      setTimeout(() => {
+        for (let i = 0; i < 13; i++) hand.push(deck.pop());
+        sortTiles(hand);
+        drawTile();
+        closeModal();
+        render();
+      }, 1500);
     }
 
     // --- 面子犠牲（HP回復）選択システム ---
@@ -787,9 +835,10 @@
       return list;
     }
 
-    // ★ 常にプレイヤーがモーダルで好きな面子を選べるように修正
     function onClickSacrificeButton() {
       if (isGameOver) return;
+      if (turn - lastSacrificeTurn < 5) return; // 5ターン未経過時不可
+
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
 
@@ -799,7 +848,7 @@
       let html = '<div style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">';
       mentsuList.forEach((m, idx) => {
         let hasDora = m.tiles.some(t => isTileDora(t));
-        let healAmt = hasDora ? 500 : 300;
+        let healAmt = hasDora ? 400 : 200; // ★ 通常200 / ドラ含む400
         html += `<div class="mentsu-option-btn" onclick="execSacrificeMentsuByIndex(${idx});">`;
         html += '<div style="display:flex; gap:3px;">';
         m.tiles.forEach(t => {
@@ -809,9 +858,12 @@
         html += '</div>';
         html += `<span style="color:${hasDora ? '#f1c40f' : '#2ecc71'}; font-weight:bold; font-size:13px;">を捧げる (+${healAmt})</span></div>`;
       });
+      // ★ キャンセルボタンを追加
+      html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
+
       window.currentMentsuList = mentsuList;
-      openModal("犠牲にする面子を選択", "ドラを含む面子はHPが500回復します！", html);
+      openModal("犠牲にする面子を選択", "ドラを含む面子はHPが400回復します！", html);
     }
 
     function execSacrificeMentsuByIndex(idx) {
@@ -826,12 +878,12 @@
       if (drawnTile) fullTiles.push(drawnTile);
 
       let hasDora = mentsuObj.tiles.some(t => isTileDora(t));
-      let healAmount = hasDora ? 500 : 300;
+      let healAmount = hasDora ? 400 : 200; // ★ 回復量200 (ドラ400)
 
       playSE('destroy');
+      lastSacrificeTurn = turn; // ★ 使用ターンを更新
 
-      // 該当する3枚を画面上で消滅アニメーションさせる
-      let handEls = document.querySelectorAll('#hand .tile, #drawn-tile .tile');
+      // 該当牌を除外（山にも河にも行かない）
       mentsuObj.tiles.forEach(target => {
         if (drawnTile && drawnTile.type === target.type && drawnTile.val === target.val && drawnTile.isAka === target.isAka) {
           drawnTile = null;
@@ -854,12 +906,12 @@
           drawnTile = deck.pop();
         }
 
-        openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！`, "");
+        openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！（除外）`, "");
         setTimeout(() => { closeModal(); render(); }, 1400);
       }, 300);
     }
 
-    // --- カン機能 ---
+    // --- カン機能（回復量変更＆河移動） ---
     function onClickKanButton() {
       if (isGameOver) return;
       const fullTiles = [...hand];
@@ -878,11 +930,13 @@
     }
 
     function showKanModal(kanKeys) {
-      let html = '<div style="display:flex; gap:10px;">';
+      let html = '<div style="display:flex; gap:10px; flex-direction:column; align-items:center;">';
       kanKeys.forEach(key => {
         let [type, valStr] = key.split('_');
         html += `<button onclick="closeModal(); execKan('${key}');">${valStr}${SUITS[type]||'字'}</button>`;
       });
+      // ★ キャンセルボタン追加
+      html += `<button class="btn-cancel" onclick="closeModal()">キャンセル</button>`;
       html += '</div>';
       openModal("どの牌をカンしますか？", "", html);
     }
@@ -896,7 +950,10 @@
 
       let targetTiles = fullTiles.filter(t => t.type === type && t.val === val);
       let hasDora = targetTiles.some(t => isTileDora(t));
-      let healAmount = hasDora ? 500 : 300;
+      let healAmount = hasDora ? 500 : 300; // ★ カンは300回復（ドラ500）
+
+      // カンした4枚の手牌を削除し、捨て牌（河）に移動！
+      targetTiles.forEach(t => river.push(t));
 
       if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
         drawnTile = null;
@@ -920,7 +977,7 @@
         return;
       }
 
-      openModal("🀄 カン！", `${hasDora ? '🐉 ドラカン！' : ''}HPが ${healAmount} 回復しました！`, "");
+      openModal("🀄 カン！", `${hasDora ? '🐉 ドラカン！' : ''}HPが ${healAmount} 回復しました！（4枚は河へ移動）`, "");
       setTimeout(() => {
         closeModal();
         drawTile();
@@ -948,7 +1005,13 @@
     function startRiichiSelect() {
       if (isRiichi || isGameOver) return;
       playSE('event');
-      openModal("リーチさせると思ったか？", "コイントスで3回連続【表】を出せばリーチ許可！失敗で牌が3つ消滅！", "<div id='coin-area'><div class='coin-img'>🪙</div><button onclick='execCoinToss()' style='margin-top:10px;'>コインを投げる</button></div>");
+      openModal("リーチさせると思ったか？", "コイントスで3回連続【表】を出せばリーチ許可！失敗で牌が3つ消滅！", `
+        <div id='coin-area'>
+          <div class='coin-img'>🪙</div>
+          <button onclick='execCoinToss()' style='margin-top:10px;'>コインを投げる</button>
+          <div><button class="btn-cancel" onclick="closeModal()">キャンセル</button></div>
+        </div>
+      `);
     }
 
     let coinSuccessCount = 0;
@@ -1474,10 +1537,30 @@
         }
       }
 
-      // 面子消費回復ボタンの表示制御
+      // ★ 面子消費回復ボタンの表示＆5ターン制限制御
       const btnSacrifice = document.getElementById('btn-sacrifice');
       let availableMentsu = findAvailableMentsu(fullTiles);
-      btnSacrifice.style.display = (!isGameOver && availableMentsu.length > 0) ? 'inline-block' : 'none';
+      if (!isGameOver && availableMentsu.length > 0) {
+        btnSacrifice.style.display = 'inline-block';
+        let coolDown = 5 - (turn - lastSacrificeTurn);
+        if (coolDown <= 0) {
+          btnSacrifice.disabled = false;
+          btnSacrifice.innerText = '面子捧げて回復';
+        } else {
+          btnSacrifice.disabled = true;
+          btnSacrifice.innerText = `回復(残り${coolDown}ターン)`;
+        }
+      } else {
+        btnSacrifice.style.display = 'none';
+      }
+
+      // ★ 九種九牌ボタン制御
+      const btnKyushu = document.getElementById('btn-kyushu');
+      if (!isGameOver && countYaochuTypes(fullTiles) >= 9) {
+        btnKyushu.style.display = 'inline-block';
+      } else {
+        btnKyushu.style.display = 'none';
+      }
 
       const btnKan = document.getElementById('btn-kan');
       let tileCounts = getTileCounts(fullTiles);
