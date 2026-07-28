@@ -197,6 +197,7 @@
       font-weight: bold;
       position: relative;
       flex-shrink: 0;
+      transition: transform 0.1s, opacity 0.3s;
     }
     .tile:active { transform: translateY(-3px); background-color: #e6c280; }
     .tile.riichi-target {
@@ -208,6 +209,18 @@
       70% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
       100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
     }
+
+    /* ★ 牌消滅・飛ぶ・犠牲のアニメーション効果 */
+    .tile.destroying {
+      animation: destroyAnim 0.6s forwards !important;
+      z-index: 10;
+    }
+    @keyframes destroyAnim {
+      0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+      50% { transform: scale(1.3) rotate(15deg); filter: brightness(2) drop-shadow(0 0 15px #ff0000); background: #ff4444; color: #fff; }
+      100% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    }
+
     .tile.red { color: #c0392b; }
     .tile.green { color: #27ae60; }
     .tile.black { color: #2c3e50; }
@@ -341,17 +354,22 @@
 
     .coin-img { font-size: 50px; transition: transform 0.5s; }
 
+    /* 面子犠牲 選択肢ボタンスタイル */
     .mentsu-option-btn {
       display: flex;
-      gap: 4px;
-      background: #222;
-      border: 1px solid #2ecc71;
-      padding: 6px;
-      border-radius: 6px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #250909;
+      border: 2px solid #ff4444;
+      padding: 8px 12px;
+      border-radius: 8px;
       cursor: pointer;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      width: 100%;
+      max-width: 340px;
     }
-    .mentsu-option-btn:hover { background: #333; }
+    .mentsu-option-btn:hover { background: #4a1010; }
   </style>
 </head>
 <body>
@@ -469,6 +487,11 @@
         osc.frequency.linearRampToValueAtTime(40, now + 0.2);
         gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'destroy') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(500, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.4);
+        gain.gain.setValueAtTime(0.7, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
       } else if (type === 'heal') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
         osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
@@ -576,7 +599,6 @@
       }
     }
 
-    // ★ 牌がドラ（赤ドラ含む）かどうか判定する関数
     function isTileDora(tile) {
       if (!tile) return false;
       if (tile.isAka) return true;
@@ -678,7 +700,6 @@
       river.push(discarded);
       playSE('discard');
 
-      // ★ ドラを捨てた場合は100減少、通常は50減少
       if (!isFree) {
         let dmg = isTileDora(discarded) ? -100 : -50;
         updateHP(dmg);
@@ -712,19 +733,33 @@
       sortTiles(hand);
     }
 
+    // ★ 牌消滅・暴発演出（赤く光って破壊されるアニメーション＆音）
     function removeRandomTiles(num) {
+      playSE('destroy');
+      let targetElements = [];
+
       for (let i = 0; i < num; i++) {
         if (drawnTile && Math.random() < 0.2) {
           drawnTile = deck.pop();
+          let drawnEl = document.querySelector('#drawn-tile .tile');
+          if (drawnEl) targetElements.push(drawnEl);
         } else if (hand.length > 0) {
           let idx = Math.floor(Math.random() * hand.length);
           hand[idx] = deck.pop();
+          let handEls = document.querySelectorAll('#hand .tile');
+          if (handEls[idx]) targetElements.push(handEls[idx]);
         }
       }
-      sortTiles(hand);
+
+      // アニメーション用クラス付与
+      targetElements.forEach(el => el.classList.add('destroying'));
+      setTimeout(() => {
+        sortTiles(hand);
+        render();
+      }, 600);
     }
 
-    // --- 面子犠牲（HP回復）システム ---
+    // --- 面子犠牲（HP回復）選択システム ---
     function findAvailableMentsu(tiles) {
       let counts = getTileCounts(tiles);
       let list = [];
@@ -733,7 +768,6 @@
       for (let k in counts) {
         if (counts[k] >= 3) {
           let [type, valStr] = k.split('_'), val = parseInt(valStr);
-          // 手牌から該当する実際の牌オブジェクトを取得（赤ドラなどの状態を保持するため）
           let matched = tiles.filter(t => t.type === type && t.val === val).slice(0, 3);
           list.push({ type: 'kotsu', tiles: matched });
         }
@@ -753,6 +787,7 @@
       return list;
     }
 
+    // ★ 常にプレイヤーがモーダルで好きな面子を選べるように修正
     function onClickSacrificeButton() {
       if (isGameOver) return;
       const fullTiles = [...hand];
@@ -761,28 +796,27 @@
       let mentsuList = findAvailableMentsu(fullTiles);
       if (mentsuList.length === 0) return;
 
-      if (mentsuList.length === 1) {
-        execSacrificeMentsu(mentsuList[0]);
-      } else {
-        let html = '<div style="display:flex; flex-direction:column; gap:6px;">';
-        mentsuList.forEach((m, idx) => {
-          let hasDora = m.tiles.some(t => isTileDora(t));
-          let healAmt = hasDora ? 500 : 300;
-          html += `<div class="mentsu-option-btn" onclick="closeModal(); execSacrificeMentsuByIndex(${idx});">`;
-          m.tiles.forEach(t => {
-            let el = createTileElement(t, null, true);
-            html += el.outerHTML;
-          });
-          html += `<span style="align-self:center; margin-left:8px; color:${hasDora ? '#f1c40f' : '#2ecc71'}; font-weight:bold;">を犠牲(+${healAmt})</span></div>`;
+      let html = '<div style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">';
+      mentsuList.forEach((m, idx) => {
+        let hasDora = m.tiles.some(t => isTileDora(t));
+        let healAmt = hasDora ? 500 : 300;
+        html += `<div class="mentsu-option-btn" onclick="execSacrificeMentsuByIndex(${idx});">`;
+        html += '<div style="display:flex; gap:3px;">';
+        m.tiles.forEach(t => {
+          let el = createTileElement(t, null, true);
+          html += el.outerHTML;
         });
         html += '</div>';
-        window.currentMentsuList = mentsuList;
-        openModal("犠牲にする面子を選択", "ドラを含む面子はHPが500回復します！", html);
-      }
+        html += `<span style="color:${hasDora ? '#f1c40f' : '#2ecc71'}; font-weight:bold; font-size:13px;">を捧げる (+${healAmt})</span></div>`;
+      });
+      html += '</div>';
+      window.currentMentsuList = mentsuList;
+      openModal("犠牲にする面子を選択", "ドラを含む面子はHPが500回復します！", html);
     }
 
     function execSacrificeMentsuByIndex(idx) {
       if (window.currentMentsuList && window.currentMentsuList[idx]) {
+        closeModal();
         execSacrificeMentsu(window.currentMentsuList[idx]);
       }
     }
@@ -791,11 +825,13 @@
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
 
-      // ★ ドラが含まれているかチェックして回復量を決定 (ドラ含む: 500 / 通常: 300)
       let hasDora = mentsuObj.tiles.some(t => isTileDora(t));
       let healAmount = hasDora ? 500 : 300;
 
-      // 該当する3枚を1枚ずつ削除
+      playSE('destroy');
+
+      // 該当する3枚を画面上で消滅アニメーションさせる
+      let handEls = document.querySelectorAll('#hand .tile, #drawn-tile .tile');
       mentsuObj.tiles.forEach(target => {
         if (drawnTile && drawnTile.type === target.type && drawnTile.val === target.val && drawnTile.isAka === target.isAka) {
           drawnTile = null;
@@ -805,23 +841,25 @@
         }
       });
 
-      playSE('heal');
       updateHP(healAmount);
 
-      for(let i = 0; i < 3; i++) {
-        if (deck.length > 0) hand.push(deck.pop());
-      }
-      sortTiles(hand);
-      
-      if (!drawnTile && deck.length > 0) {
-        drawnTile = deck.pop();
-      }
+      setTimeout(() => {
+        playSE('heal');
+        for(let i = 0; i < 3; i++) {
+          if (deck.length > 0) hand.push(deck.pop());
+        }
+        sortTiles(hand);
+        
+        if (!drawnTile && deck.length > 0) {
+          drawnTile = deck.pop();
+        }
 
-      openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを犠牲にして' : ''}HPが ${healAmount} 回復しました！`, "");
-      setTimeout(() => { closeModal(); render(); }, 1500);
+        openModal("✨ 面子を犠牲にした！", `${hasDora ? '🐉 ドラを捧げて' : ''}HPが ${healAmount} 回復しました！`, "");
+        setTimeout(() => { closeModal(); render(); }, 1400);
+      }, 300);
     }
 
-    // --- カン機能（回復量調整追加） ---
+    // --- カン機能 ---
     function onClickKanButton() {
       if (isGameOver) return;
       const fullTiles = [...hand];
@@ -856,10 +894,9 @@
       const fullTiles = [...hand];
       if (drawnTile) fullTiles.push(drawnTile);
 
-      // カンする対象の4枚を取得
       let targetTiles = fullTiles.filter(t => t.type === type && t.val === val);
       let hasDora = targetTiles.some(t => isTileDora(t));
-      let healAmount = hasDora ? 500 : 300; // ★ ドラを含むカンなら500回復、通常300
+      let healAmount = hasDora ? 500 : 300;
 
       if (drawnTile && drawnTile.type === type && drawnTile.val === val) {
         drawnTile = null;
@@ -868,7 +905,7 @@
 
       kanCount++;
       playSE('heal');
-      updateHP(healAmount); // ★ カンでHP回復！
+      updateHP(healAmount);
 
       if (deck.length > 0) {
         let newDoraInd = deck.pop();
